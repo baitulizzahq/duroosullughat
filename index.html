@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Arabic Test Generator — Lessons 1-10</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root{
     --navy:#1b3a6b;
@@ -151,6 +152,16 @@
     line-height:1.4;
   }
   .email-settings-hint a{ color:var(--navy); }
+  .show-keys-toggle{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:0.85em;
+    color:var(--navy);
+    cursor:pointer;
+    user-select:none;
+  }
+  .show-keys-toggle input{ cursor:pointer; }
 
   /* ---- Quiz panel ---- */
   #quizPanel{ display:none; }
@@ -195,7 +206,7 @@
   }
   .info-box > div{ display:flex; align-items:center; gap:8px; flex:1 1 140px; min-width:0; }
   .info-box label{ font-weight:600; color:var(--navy); white-space:nowrap; }
-  .info-box input[type=text]{
+  .info-box input[type=text], .info-box input[type=date]{
     border:none; border-bottom:2px solid var(--gold); background:transparent;
     font-size:1em; padding:4px; width:100%; min-width:0; outline:none;
   }
@@ -344,9 +355,18 @@
     .explain{ display:block !important; }
     .option input{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .info-box{ border:1px solid #999; box-shadow:none; }
-    .info-box input[type=text]{ border-bottom:1px solid #000; }
+    .info-box input[type=text], .info-box input[type=date]{ border-bottom:1px solid #000; }
     a[href]{ color:inherit; text-decoration:none; }
   }
+
+  /* Applied temporarily while generating a downloadable PDF (via html2pdf.js) */
+  .pdf-capture .setup-panel, .pdf-capture .quiz-header-bar, .pdf-capture .submit-bar,
+  .pdf-capture .export-bar, .pdf-capture .unanswered-warning, .pdf-capture .print-btn,
+  .pdf-capture .email-status, .pdf-capture #backBtn{ display:none !important; }
+  .pdf-capture .score-panel{ display:block !important; box-shadow:none; }
+  .pdf-capture .question{ break-inside:avoid; box-shadow:none; }
+  .pdf-capture .explain{ display:block !important; }
+  body.pdf-capture{ background:#fff; }
 </style>
 </head>
 <body>
@@ -388,7 +408,7 @@
     <div class="page-avail" id="pageAvail"></div>
     <div class="avail-note" id="availNote"></div>
 
-    <div class="email-settings open">
+    <div class="email-settings">
       <button type="button" id="emailSettingsToggle" class="email-settings-toggle">
         ✉️ Email Settings (optional) — auto-send results when a student submits <span id="emailSettingsArrow">▸</span>
       </button>
@@ -403,19 +423,22 @@
         </div>
         <div class="form-field">
           <label for="emailjsPublicKey">EmailJS Public Key</label>
-          <input type="text" id="emailjsPublicKey" placeholder="e.g. AbCdEfGhIjKlMnOp" value="LjogoSlLhChz7N2Vg">
+          <input type="password" id="emailjsPublicKey" placeholder="e.g. AbCdEfGhIjKlMnOp" value="LjogoSlLhChz7N2Vg" autocomplete="off">
         </div>
         <div class="form-field">
           <label for="emailjsServiceId">EmailJS Service ID</label>
-          <input type="text" id="emailjsServiceId" placeholder="e.g. service_xxxxxxx" value="service_2iw073f">
+          <input type="password" id="emailjsServiceId" placeholder="e.g. service_xxxxxxx" value="service_2iw073f" autocomplete="off">
         </div>
         <div class="form-field">
           <label for="emailjsTemplateId">EmailJS Template ID</label>
-          <input type="text" id="emailjsTemplateId" placeholder="e.g. template_xxxxxxx" value="template_pu87wzb">
+          <input type="password" id="emailjsTemplateId" placeholder="e.g. template_xxxxxxx" value="template_pu87wzb" autocomplete="off">
         </div>
         <div class="email-settings-hint">
           Leave these blank for now if you don't have them yet — the exported test will still work and let students download a PDF instead. You can regenerate/export again once you have your keys.
         </div>
+        <label class="show-keys-toggle">
+          <input type="checkbox" id="showKeysToggle"> Show values
+        </label>
       </div>
     </div>
 
@@ -431,7 +454,7 @@
 
     <div class="info-box">
       <div><label>Name: </label><input type="text" id="studentName" placeholder="Your name"></div>
-      <div><label>Date: </label><input type="text" id="studentDate" placeholder="dd/mm/yyyy"></div>
+      <div><label>Date: </label><input type="date" id="studentDate"></div>
     </div>
 
     <div class="score-panel" id="scorePanel">
@@ -1012,6 +1035,11 @@ function buildQuiz(from, to){
   unansweredWarning.style.display = 'none';
   finalizedQuiz = [];
 
+  const dateField = document.getElementById('studentDate');
+  if (dateField && !dateField.value) {
+    dateField.value = new Date().toISOString().slice(0, 10);
+  }
+
   currentQuestions.forEach((q, i) => {
     // shuffle options, remember correct text
     const correctText = q.options[q.correct];
@@ -1143,8 +1171,40 @@ document.getElementById('submitBtn').addEventListener('click', () => {
 });
 
 document.getElementById('printBtn').addEventListener('click', () => {
-  window.print();
+  downloadResultsPDF(document.getElementById('printBtn'));
 });
+
+function downloadResultsPDF(btn){
+  const el = document.querySelector('.container');
+  const originalText = btn.textContent;
+  btn.textContent = '⏳ Preparing PDF…';
+  btn.disabled = true;
+  document.body.classList.add('pdf-capture');
+
+  const stamp = new Date().toISOString().slice(0,10);
+  const opt = {
+    margin: 10,
+    filename: `arabic_test_result_${stamp}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'] }
+  };
+
+  html2pdf().set(opt).from(el).save()
+    .then(() => {
+      document.body.classList.remove('pdf-capture');
+      btn.textContent = originalText;
+      btn.disabled = false;
+    })
+    .catch((err) => {
+      console.error('PDF generation error:', err);
+      document.body.classList.remove('pdf-capture');
+      btn.textContent = originalText;
+      btn.disabled = false;
+      alert('Could not generate the PDF automatically. Please try again, or use your browsers print option (Ctrl/Cmd+P) and choose "Save as PDF".');
+    });
+}
 
 document.getElementById('resetBtn').addEventListener('click', () => {
   quizForm.reset();
@@ -1199,6 +1259,13 @@ document.getElementById('emailSettingsToggle').addEventListener('click', () => {
   document.querySelector('.email-settings').classList.toggle('open');
 });
 
+document.getElementById('showKeysToggle').addEventListener('change', (e) => {
+  const type = e.target.checked ? 'text' : 'password';
+  ['emailjsPublicKey', 'emailjsServiceId', 'emailjsTemplateId'].forEach(id => {
+    document.getElementById(id).type = type;
+  });
+});
+
 function buildStudentHTML(quiz, rangeText, emailConfig){
   emailConfig = emailConfig || {};
   const quizJSON = JSON.stringify(quiz).replace(/</g, '\\u003c');
@@ -1216,6 +1283,7 @@ function buildStudentHTML(quiz, rangeText, emailConfig){
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Arabic Test</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
 <style>
   :root{ --navy:#1b3a6b; --gold:#e8b84b; --red:#c0392b; --green:#2e7d32; --gray:#666; }
   *{ box-sizing: border-box; }
@@ -1230,7 +1298,7 @@ function buildStudentHTML(quiz, rangeText, emailConfig){
   .info-box{ background:#fff; border:1px solid #ddd; border-radius:8px; padding:14px 16px; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:14px; justify-content:space-between; font-size:0.95em; }
   .info-box > div{ display:flex; align-items:center; gap:8px; flex:1 1 140px; min-width:0; }
   .info-box label{ font-weight:600; color:var(--navy); white-space:nowrap; }
-  .info-box input[type=text]{ border:none; border-bottom:2px solid var(--gold); background:transparent; font-size:1em; padding:4px; width:100%; min-width:0; outline:none; }
+  .info-box input[type=text], .info-box input[type=date]{ border:none; border-bottom:2px solid var(--gold); background:transparent; font-size:1em; padding:4px; width:100%; min-width:0; outline:none; }
   .question{ background:#fff; border:1px solid #e2ddc9; border-left:6px solid var(--gold); border-radius:8px; padding:14px 16px; margin-bottom:14px; overflow-wrap:break-word; }
   .question.correct{ border-left-color:var(--green); background:#f2fbf2; }
   .question.incorrect{ border-left-color:var(--red); background:#fdf3f2; }
@@ -1281,8 +1349,15 @@ function buildStudentHTML(quiz, rangeText, emailConfig){
     .question{ break-inside:avoid; page-break-inside:avoid; border:1px solid #999; box-shadow:none; }
     .explain{ display:block !important; }
     .info-box{ border:1px solid #999; box-shadow:none; }
-    .info-box input[type=text]{ border-bottom:1px solid #000; }
+    .info-box input[type=text], .info-box input[type=date]{ border-bottom:1px solid #000; }
   }
+
+  .pdf-capture .submit-bar, .pdf-capture .unanswered-warning, .pdf-capture .print-btn,
+  .pdf-capture .email-status{ display:none !important; }
+  .pdf-capture .score-panel{ display:block !important; box-shadow:none; }
+  .pdf-capture .question{ break-inside:avoid; box-shadow:none; }
+  .pdf-capture .explain{ display:block !important; }
+  body.pdf-capture{ background:#fff; }
 </style>
 </head>
 <body>
@@ -1295,7 +1370,7 @@ function buildStudentHTML(quiz, rangeText, emailConfig){
   <span class="range-label">${rangeText}</span>
   <div class="info-box">
     <div><label>Name: </label><input type="text" id="studentName" placeholder="Your name"></div>
-    <div><label>Date: </label><input type="text" id="studentDate" placeholder="dd/mm/yyyy"></div>
+    <div><label>Date: </label><input type="date" id="studentDate"></div>
   </div>
   <div class="score-panel" id="scorePanel">
     <h2>Your Result</h2>
@@ -1322,6 +1397,11 @@ if (EMAIL_CONFIGURED && typeof emailjs !== 'undefined') {
 const quizForm = document.getElementById('quizForm');
 const scorePanel = document.getElementById('scorePanel');
 const unansweredWarning = document.getElementById('unansweredWarning');
+
+const dateField = document.getElementById('studentDate');
+if (dateField) {
+  dateField.value = new Date().toISOString().slice(0, 10);
+}
 
 QUIZ.forEach((q, i) => {
   const qDiv = document.createElement('div');
@@ -1453,8 +1533,40 @@ function sendResultsEmail(name, date, score, total, pct, breakdownLines) {
 }
 
 document.getElementById('printBtn').addEventListener('click', () => {
-  window.print();
+  downloadResultsPDF(document.getElementById('printBtn'));
 });
+
+function downloadResultsPDF(btn) {
+  const el = document.querySelector('.container');
+  const originalText = btn.textContent;
+  btn.textContent = '⏳ Preparing PDF…';
+  btn.disabled = true;
+  document.body.classList.add('pdf-capture');
+
+  const stamp = new Date().toISOString().slice(0,10);
+  const opt = {
+    margin: 10,
+    filename: 'arabic_test_result_' + stamp + '.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'] }
+  };
+
+  html2pdf().set(opt).from(el).save()
+    .then(() => {
+      document.body.classList.remove('pdf-capture');
+      btn.textContent = originalText;
+      btn.disabled = false;
+    })
+    .catch((err) => {
+      console.error('PDF generation error:', err);
+      document.body.classList.remove('pdf-capture');
+      btn.textContent = originalText;
+      btn.disabled = false;
+      alert('Could not generate the PDF automatically. Please try again, or use your browser\\'s print option (Ctrl/Cmd+P) and choose "Save as PDF".');
+    });
+}
 
 document.getElementById('resetBtn').addEventListener('click', () => {
   quizForm.reset();
