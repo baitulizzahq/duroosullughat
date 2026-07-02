@@ -1,0 +1,1482 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Arabic Test Generator — Lessons 1-10</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  :root{
+    --navy:#1b3a6b;
+    --gold:#e8b84b;
+    --red:#c0392b;
+    --green:#2e7d32;
+    --gray:#666;
+  }
+  *{ box-sizing: border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background:#f4f1e9;
+    margin:0;
+    padding:0 0 40px 0;
+    color:#222;
+    overflow-x:hidden;
+  }
+  header{
+    background: linear-gradient(135deg, var(--navy), #274a80);
+    color:#fff;
+    padding:24px 16px;
+    text-align:center;
+  }
+  header h1{ margin:0 0 6px 0; font-size:1.4em; line-height:1.3; }
+  header .arabic-title{ font-size:1.3em; color:var(--gold); margin-bottom:8px; direction:rtl; line-height:1.5; }
+  header p{ margin:0; color:#e0e0e0; font-size:0.9em; }
+
+  .container{ max-width:820px; margin:0 auto; padding:16px 12px; width:100%; }
+
+  /* ---- Setup panel ---- */
+  .setup-panel{
+    background:#fff;
+    border:1px solid #e2ddc9;
+    border-radius:10px;
+    padding:20px 18px;
+    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  }
+  .setup-panel h2{
+    margin:0 0 4px 0;
+    color:var(--navy);
+    font-size:1.15em;
+  }
+  .setup-panel .sub{ color:var(--gray); font-size:0.9em; margin-bottom:16px; }
+  .form-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .form-field{
+    flex:1 1 140px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .form-field label{ font-weight:600; color:var(--navy); font-size:0.92em; }
+  .form-field input, .form-field select{
+    padding:10px 12px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:1em;
+    width:100%;
+  }
+  .range-hint{
+    font-size:0.82em;
+    color:var(--gray);
+    margin-top:-6px;
+    margin-bottom:10px;
+  }
+  .page-avail{
+    background: #fff8e1;
+    border:1px dashed var(--gold);
+    border-radius:6px;
+    padding:8px 12px;
+    font-size:0.85em;
+    color:#6b5a1f;
+    margin-bottom:14px;
+  }
+  #generateBtn{
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    padding:14px 28px;
+    font-size:1.05em;
+    border-radius:30px;
+    cursor:pointer;
+    box-shadow:0 3px 8px rgba(0,0,0,0.2);
+    width:100%;
+    min-height:48px;
+  }
+  #generateBtn:hover{ background:#274a80; }
+  .setup-error{
+    color:var(--red);
+    font-weight:600;
+    font-size:0.9em;
+    margin-bottom:10px;
+    display:none;
+  }
+  .avail-note{
+    font-size:0.85em;
+    color:var(--red);
+    margin-bottom:10px;
+    display:none;
+  }
+
+  .email-settings{
+    border:1px solid #e2ddc9;
+    border-radius:8px;
+    margin-bottom:16px;
+    overflow:hidden;
+  }
+  .email-settings-toggle{
+    width:100%;
+    text-align:left;
+    background:#fdf8ec;
+    border:none;
+    padding:12px 14px;
+    font-size:0.92em;
+    font-weight:600;
+    color:var(--navy);
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .email-settings-toggle:hover{ background:#faf1d8; }
+  #emailSettingsArrow{ transition:transform .2s; }
+  .email-settings.open #emailSettingsArrow{ transform:rotate(90deg); }
+  .email-settings-body{
+    display:none;
+    padding:14px;
+    border-top:1px solid #e2ddc9;
+    background:#fff;
+  }
+  .email-settings.open .email-settings-body{ display:block; }
+  .email-settings-body .form-field{ margin-bottom:12px; }
+  .email-settings-hint{
+    font-size:0.82em;
+    color:var(--gray);
+    margin-bottom:12px;
+    line-height:1.4;
+  }
+  .email-settings-hint a{ color:var(--navy); }
+
+  /* ---- Quiz panel ---- */
+  #quizPanel{ display:none; }
+  .quiz-header-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .quiz-header-bar .range-label{
+    font-size:0.9em;
+    color:var(--navy);
+    font-weight:600;
+    background:#fff;
+    border:1px solid #e2ddc9;
+    padding:8px 12px;
+    border-radius:20px;
+  }
+  #backBtn{
+    background:#fff;
+    color:var(--navy);
+    border:2px solid var(--navy);
+    padding:8px 16px;
+    font-size:0.9em;
+    border-radius:20px;
+    cursor:pointer;
+  }
+
+  .info-box{
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom:20px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    justify-content:space-between;
+    font-size:0.95em;
+  }
+  .info-box > div{ display:flex; align-items:center; gap:8px; flex:1 1 140px; min-width:0; }
+  .info-box label{ font-weight:600; color:var(--navy); white-space:nowrap; }
+  .info-box input[type=text]{
+    border:none; border-bottom:2px solid var(--gold); background:transparent;
+    font-size:1em; padding:4px; width:100%; min-width:0; outline:none;
+  }
+
+  .question{
+    background:#fff;
+    border:1px solid #e2ddc9;
+    border-left:6px solid var(--gold);
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom:14px;
+    overflow-wrap:break-word;
+  }
+  .question.correct{ border-left-color: var(--green); background:#f2fbf2; }
+  .question.incorrect{ border-left-color: var(--red); background:#fdf3f2; }
+  .q-title{ font-weight:600; margin-bottom:10px; font-size:1em; line-height:1.5; color:var(--navy); }
+  .q-tag{
+    display:inline-block;
+    font-size:0.72em;
+    font-weight:700;
+    color:#8a6d1c;
+    background:#fdf1cf;
+    border-radius:10px;
+    padding:2px 8px;
+    margin-bottom:8px;
+  }
+  .q-arabic{ direction:rtl; font-size:1.25em; font-weight:600; color:#111; margin-left:6px; display:inline-block; }
+  .options{ display:flex; flex-direction:column; gap:6px; }
+  .option{
+    display:flex; align-items:center; gap:10px;
+    padding:12px 10px; border-radius:6px; cursor:pointer;
+    border:1px solid transparent; min-height:44px;
+    -webkit-tap-highlight-color: rgba(232,184,75,0.3);
+  }
+  .option:hover, .option:active{ background:#faf6e7; }
+  .option input{ transform: scale(1.3); cursor:pointer; flex-shrink:0; }
+  .option .opt-text{ font-size:0.98em; line-height:1.4; }
+  .opt-arabic{ direction:rtl; font-size:1.15em; margin-right:4px; display:inline-block; }
+  .feedback-icon{ font-weight:700; margin-left:8px; flex-shrink:0; }
+  .feedback-icon.right{ color:var(--green); }
+  .feedback-icon.wrong{ color:var(--red); }
+  .explain{ margin-top:8px; font-size:0.9em; color:var(--gray); display:none; }
+  .question.checked .explain{ display:block; }
+
+  .submit-bar{
+    position:sticky; bottom:0; background:#f4f1e9;
+    padding:14px 8px; text-align:center;
+    display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
+    border-top:1px solid #e2ddc9;
+  }
+  #submitBtn{
+    background:var(--navy); color:#fff; border:none;
+    padding:14px 30px; font-size:1.05em; border-radius:30px; cursor:pointer;
+    box-shadow:0 3px 8px rgba(0,0,0,0.2); min-height:48px; flex:1 1 auto; max-width:260px;
+  }
+  #submitBtn:hover{ background:#274a80; }
+  #resetBtn{
+    background:#fff; color:var(--navy); border:2px solid var(--navy);
+    padding:12px 24px; font-size:1em; border-radius:30px; cursor:pointer;
+    min-height:48px; flex:1 1 auto; max-width:200px;
+  }
+  #newTestBtn{
+    background:#fff; color:var(--red); border:2px solid var(--red);
+    padding:12px 24px; font-size:1em; border-radius:30px; cursor:pointer;
+    min-height:48px; flex:1 1 auto; max-width:220px;
+  }
+
+  .export-bar{
+    margin-top:18px;
+    padding:16px;
+    background:#fff;
+    border:2px dashed var(--navy);
+    border-radius:10px;
+    text-align:center;
+  }
+  #exportBtn{
+    background:var(--green);
+    color:#fff;
+    border:none;
+    padding:14px 24px;
+    font-size:1em;
+    border-radius:30px;
+    cursor:pointer;
+    min-height:48px;
+    width:100%;
+    max-width:520px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.15);
+  }
+  #exportBtn:hover{ background:#245c28; }
+  .export-hint{
+    font-size:0.82em;
+    color:var(--gray);
+    margin-top:8px;
+  }
+
+  .score-panel{
+    background: linear-gradient(135deg, var(--gold), #f5d98a);
+    border-radius:10px; padding:18px 16px; text-align:center;
+    margin-bottom:20px; display:none; box-shadow:0 3px 10px rgba(0,0,0,0.15);
+  }
+  .score-panel h2{ margin:0 0 6px 0; color:var(--navy); font-size:1.2em; }
+  .score-panel .score-num{ font-size:2em; font-weight:700; color:var(--navy); }
+  .score-panel .msg{ font-size:0.95em; color:#3a3a3a; margin-top:6px; line-height:1.4; }
+  .print-btn{
+    display:none;
+    margin-top:14px;
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    padding:12px 22px;
+    font-size:0.95em;
+    border-radius:24px;
+    cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  }
+  .print-btn:hover{ background:#274a80; }
+  .unanswered-warning{
+    color:var(--red); text-align:center; font-weight:600;
+    margin-bottom:14px; display:none; font-size:0.95em; padding:0 8px;
+  }
+  footer{ text-align:center; color:#999; font-size:0.8em; margin-top:24px; padding:0 12px; }
+
+  @media (max-width: 480px){
+    header h1{ font-size:1.2em; }
+    header .arabic-title{ font-size:1.15em; }
+    .container{ padding:12px 10px; }
+    .question{ padding:12px 12px; border-left-width:5px; }
+    .q-title{ font-size:0.95em; }
+    .q-arabic{ font-size:1.15em; }
+    .opt-arabic{ font-size:1.05em; }
+    .info-box{ flex-direction:column; gap:10px; }
+    .info-box > div{ flex:1 1 auto; }
+    #submitBtn, #resetBtn, #newTestBtn{ max-width:none; width:100%; }
+    .form-row{ flex-direction:column; }
+  }
+
+  @media print{
+    body{ background:#fff; padding-bottom:0; }
+    header{ background:#fff !important; color:#000; padding:10px 0; }
+    header .arabic-title{ color:#000; }
+    header p{ color:#333; }
+    .setup-panel, .quiz-header-bar, .submit-bar, .export-bar,
+    .unanswered-warning, .print-btn, #backBtn{ display:none !important; }
+    .score-panel{ display:block !important; background:#fff; border:2px solid #000; box-shadow:none; }
+    .question{ break-inside:avoid; page-break-inside:avoid; border:1px solid #999; box-shadow:none; }
+    .explain{ display:block !important; }
+    .option input{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .info-box{ border:1px solid #999; box-shadow:none; }
+    .info-box input[type=text]{ border-bottom:1px solid #000; }
+    a[href]{ color:inherit; text-decoration:none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="arabic-title">مُوَلِّدُ الِاخْتِبَارَاتِ</div>
+  <h1>Arabic Test Generator — Lessons 1–10</h1>
+  <p>Pick a page range and number of questions to build a custom test</p>
+</header>
+
+<div class="container">
+
+  <!-- ==================== SETUP PANEL ==================== -->
+  <div class="setup-panel" id="setupPanel">
+    <h2>Create Your Test</h2>
+    <div class="sub">Questions are drawn from workbook pages 3–80 (Lessons 1–10, plus Sun &amp; Moon Letters).</div>
+
+    <div class="setup-error" id="setupError"></div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="fromPage">From page</label>
+        <input type="number" id="fromPage" min="3" max="80" value="3">
+      </div>
+      <div class="form-field">
+        <label for="toPage">To page</label>
+        <input type="number" id="toPage" min="3" max="80" value="80">
+      </div>
+    </div>
+    <div class="range-hint">Valid page range: 3–80</div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="numQuestions">Number of questions</label>
+        <input type="number" id="numQuestions" min="1" max="60" value="15">
+      </div>
+    </div>
+
+    <div class="page-avail" id="pageAvail"></div>
+    <div class="avail-note" id="availNote"></div>
+
+    <div class="email-settings open">
+      <button type="button" id="emailSettingsToggle" class="email-settings-toggle">
+        ✉️ Email Settings (optional) — auto-send results when a student submits <span id="emailSettingsArrow">▸</span>
+      </button>
+      <div class="email-settings-body" id="emailSettingsBody">
+        <div class="email-settings-hint">
+          Fill these in once you've created a free <a href="https://www.emailjs.com" target="_blank" rel="noopener">EmailJS</a> account.
+          These values get embedded into every "Download Student Version" file you export, so results are emailed to you automatically the moment a student submits — no action needed from them.
+        </div>
+        <div class="form-field">
+          <label for="teacherEmail">Your email (where results are sent)</label>
+          <input type="text" id="teacherEmail" placeholder="you@example.com" value="Baitulizzah2024@gmail.com">
+        </div>
+        <div class="form-field">
+          <label for="emailjsPublicKey">EmailJS Public Key</label>
+          <input type="text" id="emailjsPublicKey" placeholder="e.g. AbCdEfGhIjKlMnOp" value="LjogoSlLhChz7N2Vg">
+        </div>
+        <div class="form-field">
+          <label for="emailjsServiceId">EmailJS Service ID</label>
+          <input type="text" id="emailjsServiceId" placeholder="e.g. service_xxxxxxx" value="service_2iw073f">
+        </div>
+        <div class="form-field">
+          <label for="emailjsTemplateId">EmailJS Template ID</label>
+          <input type="text" id="emailjsTemplateId" placeholder="e.g. template_xxxxxxx" value="template_pu87wzb">
+        </div>
+        <div class="email-settings-hint">
+          Leave these blank for now if you don't have them yet — the exported test will still work and let students download a PDF instead. You can regenerate/export again once you have your keys.
+        </div>
+      </div>
+    </div>
+
+    <button type="button" id="generateBtn">Generate Test</button>
+  </div>
+
+  <!-- ==================== QUIZ PANEL ==================== -->
+  <div id="quizPanel">
+    <div class="quiz-header-bar">
+      <span class="range-label" id="rangeLabel"></span>
+      <button type="button" id="backBtn">⟵ New Setup</button>
+    </div>
+
+    <div class="info-box">
+      <div><label>Name: </label><input type="text" id="studentName" placeholder="Your name"></div>
+      <div><label>Date: </label><input type="text" id="studentDate" placeholder="dd/mm/yyyy"></div>
+    </div>
+
+    <div class="score-panel" id="scorePanel">
+      <h2>Your Result</h2>
+      <div class="score-num" id="scoreNum">0 / 0</div>
+      <div class="msg" id="scoreMsg"></div>
+      <button type="button" id="printBtn" class="print-btn">📄 Download PDF of This Test</button>
+    </div>
+
+    <div class="unanswered-warning" id="unansweredWarning">
+      Please answer all questions before submitting.
+    </div>
+
+    <form id="quizForm"></form>
+
+    <div class="submit-bar">
+      <button type="button" id="submitBtn">Submit Test</button>
+      <button type="button" id="resetBtn">Reset Answers</button>
+      <button type="button" id="newTestBtn">Generate New Test</button>
+    </div>
+
+    <div class="export-bar">
+      <button type="button" id="exportBtn">⬇ Download Student Version (no generator, just this test)</button>
+      <div class="export-hint">This creates a separate file with only this test — safe to share or host for students.</div>
+    </div>
+  </div>
+
+  <footer>Based on Lessons 1–10 of the Arabic workbook (pages 3–80), including the Sun &amp; Moon Letters lesson</footer>
+</div>
+
+<script>
+/* ===================================================================
+   QUESTION BANK — every question tagged with its source workbook page
+   =================================================================== */
+const BANK = [
+  // ---------------- Page 3 ----------------
+  { page:3, title:"<span class='q-arabic'>هَذَا بَابٌ</span> means:", options:["This is a window","This is a door","This is a book","This is a key"], correct:1, explain:"بَابٌ means 'door'." },
+  { page:3, title:"Which word means <b>\"key\"</b>?", options:["<span class='opt-arabic'>مِفْتَاحٌ</span>","<span class='opt-arabic'>قَلَمٌ</span>","<span class='opt-arabic'>كِتَابٌ</span>","<span class='opt-arabic'>كُرْسِيٌّ</span>"], correct:0, explain:"مِفْتَاحٌ means 'key'." },
+  { page:3, title:"<span class='q-arabic'>هَذَا مَسْجِدٌ</span> means:", options:["This is a house","This is a mosque","This is a chair","This is a bed"], correct:1, explain:"مَسْجِدٌ means 'mosque'." },
+  { page:3, title:"Which word means <b>\"chair\"</b>?", options:["<span class='opt-arabic'>سَرِيرٌ</span>","<span class='opt-arabic'>مَكْتَبٌ</span>","<span class='opt-arabic'>كُرْسِيٌّ</span>","<span class='opt-arabic'>بَيْتٌ</span>"], correct:2, explain:"كُرْسِيٌّ means 'chair'." },
+
+  // ---------------- Page 4 ----------------
+  { page:4, title:"<span class='q-arabic'>مَا هَذَا؟</span> means:", options:["Who is this?", "What is this?", "Is this...?", "That is..."], correct:1, explain:"مَا هَذَا؟ = 'What is this?'" },
+  { page:4, title:"Complete: <span class='q-arabic'>أَهَذَا بَيْتٌ؟ نَعَمْ، هَذَا ____</span>", options:["<span class='opt-arabic'>مَسْجِدٌ</span>","<span class='opt-arabic'>بَيْتٌ</span>","<span class='opt-arabic'>قَلَمٌ</span>","<span class='opt-arabic'>كِتَابٌ</span>"], correct:1, explain:"Since the answer is 'yes' (نَعَمْ), it confirms بَيْتٌ." },
+  { page:4, title:"What does <span class='q-arabic'>نَعَمْ</span> mean?", options:["No", "Yes", "Maybe", "This"], correct:1, explain:"نَعَمْ means 'yes'." },
+  { page:4, title:"Complete: <span class='q-arabic'>أَهَذَا سَرِيرٌ؟ لَا، هَذَا ____</span>", options:["<span class='opt-arabic'>كُرْسِيٌّ</span>","<span class='opt-arabic'>سَرِيرٌ</span>","<span class='opt-arabic'>بَيْتٌ</span>","<span class='opt-arabic'>مِفْتَاحٌ</span>"], correct:0, explain:"The answer is 'no', so it must be corrected to كُرْسِيٌّ (chair)." },
+
+  // ---------------- Page 5 ----------------
+  { page:5, title:"In the exercise, the desk picture is correctly labeled:", options:["<span class='opt-arabic'>مَكْتَبٌ</span>","<span class='opt-arabic'>سَرِيرٌ</span>","<span class='opt-arabic'>بَابٌ</span>","<span class='opt-arabic'>كِتَابٌ</span>"], correct:0, explain:"مَكْتَبٌ means 'writing table / desk'." },
+  { page:5, title:"Which particle introduces the question <span class='q-arabic'>مَا هَذَا؟</span>?", options:["<span class='opt-arabic'>مَنْ</span>","<span class='opt-arabic'>هَلْ</span>","<span class='opt-arabic'>مَا</span>","<span class='opt-arabic'>ذَلِكَ</span>"], correct:2, explain:"مَا is the question word 'what'." },
+
+  // ---------------- Page 6 ----------------
+  { page:6, title:"Answer: <span class='q-arabic'>أَهَذَا بَيْتٌ؟</span>", options:["<span class='opt-arabic'>لَا، هَذَا مَسْجِدٌ</span>","<span class='opt-arabic'>نَعَمْ، هَذَا بَيْتٌ</span>","<span class='opt-arabic'>مَا هَذَا؟</span>","<span class='opt-arabic'>ذَلِكَ بَيْتٌ</span>"], correct:1, explain:"The picture shows a house, so the correct affirmative answer is نَعَمْ، هَذَا بَيْتٌ." },
+  { page:6, title:"Answer: <span class='q-arabic'>أَهَذَا قَمِيصٌ؟</span>", options:["<span class='opt-arabic'>نَعَمْ، هَذَا قَمِيصٌ</span>","<span class='opt-arabic'>لَا، هَذَا كِتَابٌ</span>","<span class='opt-arabic'>مَنْ هَذَا؟</span>","<span class='opt-arabic'>ذَلِكَ قَمِيصٌ</span>"], correct:0, explain:"The picture is a shirt, so the correct answer is نَعَمْ، هَذَا قَمِيصٌ." },
+  { page:6, title:"Answer: <span class='q-arabic'>أَهَذَا نَجْمٌ؟</span>", options:["<span class='opt-arabic'>لَا، هَذَا قَمَرٌ</span>","<span class='opt-arabic'>نَعَمْ، هَذَا نَجْمٌ</span>","<span class='opt-arabic'>مَا هَذَا؟</span>","<span class='opt-arabic'>ذَلِكَ نَجْمٌ</span>"], correct:1, explain:"The picture is a star, so the correct answer is نَعَمْ، هَذَا نَجْمٌ." },
+
+  // ---------------- Page 7 ----------------
+  { page:7, title:"<span class='q-arabic'>مَنْ هَذَا؟</span> means:", options:["What is this?", "Who is this?", "Where is this?", "Is this...?"], correct:1, explain:"مَنْ هَذَا؟ = 'Who is this?' — used for people." },
+  { page:7, title:"<span class='q-arabic'>هَذَا طَبِيبٌ</span> means:", options:["This is a teacher", "This is a doctor", "This is a student", "This is a man"], correct:1, explain:"طَبِيبٌ means 'doctor'." },
+  { page:7, title:"Complete: <span class='q-arabic'>أَهَذَا وَلَدٌ؟ لَا، هَذَا ____</span>", options:["<span class='opt-arabic'>رَجُلٌ</span>","<span class='opt-arabic'>وَلَدٌ</span>","<span class='opt-arabic'>طَالِبٌ</span>","<span class='opt-arabic'>طَبِيبٌ</span>"], correct:0, explain:"The answer is 'no', correcting it to رَجُلٌ (man)." },
+  { page:7, title:"<span class='q-arabic'>هَذَا طَالِبٌ</span> means:", options:["This is a merchant", "This is a student", "This is a doctor", "This is a boy"], correct:1, explain:"طَالِبٌ means 'student'." },
+
+  // ---------------- Page 8 ----------------
+  { page:8, title:"<span class='q-arabic'>مَنْ هَذَا؟ هَذَا تَاجِرٌ</span> means:", options:["Who is this? This is a merchant", "What is this? This is a shop", "Who is this? This is a teacher", "Who is this? This is a doctor"], correct:0, explain:"تَاجِرٌ means 'merchant'." },
+  { page:8, title:"<span class='q-arabic'>هَذَا كَلْبٌ</span> means:", options:["This is a cat", "This is a dog", "This is a donkey", "This is a horse"], correct:1, explain:"كَلْبٌ means 'dog'." },
+  { page:8, title:"Complete: <span class='q-arabic'>أَهَذَا كَلْبٌ؟ لَا، هَذَا ____</span>", options:["<span class='opt-arabic'>قِطٌّ</span>","<span class='opt-arabic'>كَلْبٌ</span>","<span class='opt-arabic'>حِمَارٌ</span>","<span class='opt-arabic'>حِصَانٌ</span>"], correct:0, explain:"The answer is 'no', correcting it to قِطٌّ (cat)." },
+  { page:8, title:"<span class='q-arabic'>هَذَا حِمَارٌ</span> means:", options:["This is a horse", "This is a camel", "This is a donkey", "This is a rooster"], correct:2, explain:"حِمَارٌ means 'donkey'." },
+
+  // ---------------- Page 9 ----------------
+  { page:9, title:"Complete: <span class='q-arabic'>أَهَذَا حِمَارٌ؟ لَا، هَذَا ____</span>", options:["<span class='opt-arabic'>حِصَانٌ</span>","<span class='opt-arabic'>حِمَارٌ</span>","<span class='opt-arabic'>جَمَلٌ</span>","<span class='opt-arabic'>دِيكٌ</span>"], correct:0, explain:"The answer is 'no', correcting it to حِصَانٌ (horse)." },
+  { page:9, title:"<span class='q-arabic'>وَمَا هَذَا؟ هَذَا جَمَلٌ</span> — <span class='opt-arabic'>جَمَلٌ</span> means:", options:["Horse","Donkey","Camel","Rooster"], correct:2, explain:"جَمَلٌ means 'camel'." },
+  { page:9, title:"<span class='q-arabic'>مَا هَذَا؟ هَذَا دِيكٌ</span> — <span class='opt-arabic'>دِيكٌ</span> means:", options:["Cat","Rooster","Dog","Camel"], correct:1, explain:"دِيكٌ means 'rooster'." },
+  { page:9, title:"<span class='q-arabic'>مَنْ هَذَا؟ هَذَا مُدَرِّسٌ</span> — <span class='opt-arabic'>مُدَرِّسٌ</span> means:", options:["Doctor","Merchant","Teacher","Imam"], correct:2, explain:"مُدَرِّسٌ means 'teacher'." },
+
+  // ---------------- Page 10 ----------------
+  { page:10, title:"<span class='q-arabic'>مَنْ هَذَا؟ هَذَا طَبِيبٌ</span> — what is being identified?", options:["An animal","A profession (doctor)","A place","An object"], correct:1, explain:"طَبِيبٌ (doctor) is a profession, identified with مَنْ (who)." },
+  { page:10, title:"Complete: <span class='q-arabic'>أَهَذَا كَلْبٌ؟ لَا، هَذَا ____</span>", options:["<span class='opt-arabic'>قِطٌّ</span>","<span class='opt-arabic'>دِيكٌ</span>","<span class='opt-arabic'>جَمَلٌ</span>","<span class='opt-arabic'>حِصَانٌ</span>"], correct:0, explain:"The correction gives قِطٌّ (cat)." },
+  { page:10, title:"Complete: <span class='q-arabic'>أَهَذَا حِصَانٌ؟ لَا، هَذَا ____</span>", options:["<span class='opt-arabic'>حِمَارٌ</span>","<span class='opt-arabic'>حِصَانٌ</span>","<span class='opt-arabic'>جَمَلٌ</span>","<span class='opt-arabic'>قِطٌّ</span>"], correct:0, explain:"The correction gives حِمَارٌ (donkey)." },
+  { page:10, title:"<span class='q-arabic'>أَهَذَا دِيكٌ؟ نَعَمْ</span> confirms the picture is a:", options:["Camel","Rooster","Horse","Donkey"], correct:1, explain:"دِيكٌ means 'rooster', and نَعَمْ confirms it." },
+
+  // ---------------- Page 11 (grammar notes) ----------------
+  { page:11, title:"<span class='q-arabic'>هَذَا</span> is written without the first alif, but pronounced:", options:["ha", "hādhā", "dhālika", "hunā"], correct:1, explain:"هَذَا is pronounced hādhā despite the missing alif in writing." },
+  { page:11, title:"True or false: Arabic has a word corresponding to English \"is\" (a copula).", options:["True", "False"], correct:1, explain:"Arabic has no copula — there is no word for 'is' in simple nominal sentences." },
+  { page:11, title:"The n-sound (tanwin) at the end of an Arabic noun corresponds to English:", options:["The definite article 'the'", "The indefinite article 'a/an'", "The plural marker", "The question marker"], correct:1, explain:"Tanwin is the Arabic indefinite article, like English 'a' or 'an'." },
+  { page:11, title:"The particle <span class='q-arabic'>أَ</span> placed at the start of a statement:", options:["Negates it", "Turns it into a question", "Makes it definite", "Means 'and'"], correct:1, explain:"أَ at the beginning of a sentence turns a statement into a yes/no question." },
+
+  // ---------------- Page 12 (vocabulary) ----------------
+  { page:12, title:"Which word means <b>\"merchant\"</b>?", options:["<span class='opt-arabic'>طَبِيبٌ</span>","<span class='opt-arabic'>تَاجِرٌ</span>","<span class='opt-arabic'>مُدَرِّسٌ</span>","<span class='opt-arabic'>رَجُلٌ</span>"], correct:1, explain:"تَاجِرٌ means 'merchant'." },
+  { page:12, title:"Which word means <b>\"kerchief\"</b>?", options:["<span class='opt-arabic'>مِنْدِيلٌ</span>","<span class='opt-arabic'>قَمِيصٌ</span>","<span class='opt-arabic'>مَكْتَبٌ</span>","<span class='opt-arabic'>كِتَابٌ</span>"], correct:0, explain:"مِنْدِيلٌ means 'kerchief/handkerchief'." },
+  { page:12, title:"<span class='opt-arabic'>مُدَرِّسٌ</span> means:", options:["Student","Teacher","Doctor","Merchant"], correct:1, explain:"مُدَرِّسٌ means 'teacher'." },
+  { page:12, title:"<span class='opt-arabic'>قَمِيصٌ</span> means:", options:["Book","Key","Shirt","Star"], correct:2, explain:"قَمِيصٌ means 'shirt'." },
+
+  // ---------------- Page 13 (Lesson 2 – ذلك) ----------------
+  { page:13, title:"<span class='q-arabic'>ذَلِكَ</span> means:", options:["This (near)", "That (far)", "And", "Who"], correct:1, explain:"ذَلِكَ means 'that', referring to something farther away." },
+  { page:13, title:"<span class='q-arabic'>مَا ذَلِكَ؟ ذَلِكَ نَجْمٌ</span> means:", options:["What is this? This is a star", "What is that? That is a star", "Who is that? That is a teacher", "Is that a star?"], correct:1, explain:"ذَلِكَ (that) is used because the star is far away." },
+  { page:13, title:"<span class='q-arabic'>هَذَا مَسْجِدٌ وَذَلِكَ بَيْتٌ</span> means:", options:["This is a mosque and that is a house", "This is a house and that is a mosque", "This is a mosque and this is a house", "That is a mosque and that is a house"], correct:0, explain:"هَذَا (this/near) = mosque; ذَلِكَ (that/far) = house." },
+  { page:13, title:"Complete: <span class='q-arabic'>أَذَلِكَ كَلْبٌ؟ لَا، ذَلِكَ ____</span>", options:["<span class='opt-arabic'>قِطٌّ</span>","<span class='opt-arabic'>كَلْبٌ</span>","<span class='opt-arabic'>حِصَانٌ</span>","<span class='opt-arabic'>حِمَارٌ</span>"], correct:0, explain:"The correction gives قِطٌّ (cat)." },
+
+  // ---------------- Page 14 ----------------
+  { page:14, title:"Complete: <span class='q-arabic'>مَنْ هَذَا وَمَنْ ذَلِكَ؟ هَذَا مُدَرِّسٌ وَذَلِكَ ____</span>", options:["<span class='opt-arabic'>إِمَامٌ</span>","<span class='opt-arabic'>تَاجِرٌ</span>","<span class='opt-arabic'>طَبِيبٌ</span>","<span class='opt-arabic'>طَالِبٌ</span>"], correct:0, explain:"إِمَامٌ means 'imam', identified with ذَلِكَ (that, far)." },
+  { page:14, title:"<span class='q-arabic'>مَا ذَلِكَ؟ ذَلِكَ حَجَرٌ</span> — <span class='opt-arabic'>حَجَرٌ</span> means:", options:["Sugar","Milk","Stone","Star"], correct:2, explain:"حَجَرٌ means 'stone'." },
+  { page:14, title:"<span class='q-arabic'>هَذَا سُكَّرٌ وَذَلِكَ لَبَنٌ</span> means:", options:["This is milk and that is sugar", "This is sugar and that is milk", "This is water and that is sugar", "This is sugar and that is stone"], correct:1, explain:"سُكَّرٌ = sugar (near); لَبَنٌ = milk (far)." },
+
+  // ---------------- Page 15 ----------------
+  { page:15, title:"<span class='opt-arabic'>لَبَنٌ</span> means:", options:["Sugar","Milk","Stone","Water"], correct:1, explain:"لَبَنٌ means 'milk'." },
+  { page:15, title:"<span class='opt-arabic'>سُكَّرٌ</span> means:", options:["Sugar","Stone","Imam","Milk"], correct:0, explain:"سُكَّرٌ means 'sugar'." },
+  { page:15, title:"<span class='opt-arabic'>حَجَرٌ</span> means:", options:["Milk","Sugar","Stone","Imam"], correct:2, explain:"حَجَرٌ means 'stone'." },
+  { page:15, title:"<span class='opt-arabic'>إِمَامٌ</span> means:", options:["Teacher","Imam","Merchant","Doctor"], correct:1, explain:"إِمَامٌ means 'imam' (prayer leader)." },
+
+  // ---------------- Page 16 (grammar notes) ----------------
+  { page:16, title:"<span class='q-arabic'>ذَلِكَ</span> is written without alif but is pronounced:", options:["dhalka", "dhālika", "dhalik", "thaalik"], correct:1, explain:"ذَلِكَ is pronounced dhālika." },
+  { page:16, title:"The word <span class='q-arabic'>وَ</span> (\"and\") is written:", options:["As a separate word with a space after it", "Close to (attached to) the following word", "Only at the end of a sentence", "Only before verbs"], correct:1, explain:"وَ is always written joined closely to the word that follows it." },
+  { page:16, title:"Complete: <span class='q-arabic'>هَذَا بَيْتٌ، وَذَلِكَ ____</span> (mosque)", options:["<span class='opt-arabic'>مَسْجِدٌ</span>","<span class='opt-arabic'>بَيْتٌ</span>","<span class='opt-arabic'>حَجَرٌ</span>","<span class='opt-arabic'>لَبَنٌ</span>"], correct:0, explain:"مَسْجِدٌ means 'mosque'." },
+
+  // ---------------- Page 17 (Lesson 3 – ال) ----------------
+  { page:17, title:"Adding <span class='q-arabic'>اَلْ</span> to a noun makes it:", options:["Plural", "Definite (\"the\")", "Negative", "A question"], correct:1, explain:"اَلْ is the definite article, equivalent to English 'the'." },
+  { page:17, title:"<span class='opt-arabic'>كِتَابٌ</span> (a book) + <span class='q-arabic'>اَلْ</span> becomes:", options:["<span class='opt-arabic'>الْكِتَابُ</span>","<span class='opt-arabic'>كِتَابُ الْ</span>","<span class='opt-arabic'>هَذَا كِتَابٌ</span>","<span class='opt-arabic'>ذَلِكَ كِتَابٌ</span>"], correct:0, explain:"اَلْ is prefixed to the noun: الْكِتَابُ ('the book')." },
+  { page:17, title:"<span class='q-arabic'>الْقَلَمُ مَكْسُورٌ</span> means:", options:["The pen is new", "The pen is broken", "The door is open", "The book is heavy"], correct:1, explain:"مَكْسُورٌ means 'broken'." },
+  { page:17, title:"<span class='q-arabic'>الْبَابُ مَفْتُوحٌ</span> means:", options:["The door is closed", "The door is open", "The window is open", "The door is broken"], correct:1, explain:"مَفْتُوحٌ means 'open'." },
+  { page:17, title:"<span class='q-arabic'>الْوَلَدُ جَالِسٌ وَالْمُدَرِّسُ وَاقِفٌ</span> means:", options:["The boy is standing and the teacher is sitting", "The boy is sitting and the teacher is standing", "The boy and the teacher are both sitting", "The boy and the teacher are both standing"], correct:1, explain:"جَالِسٌ = sitting; وَاقِفٌ = standing." },
+  { page:17, title:"<span class='q-arabic'>الْحِمَارُ صَغِيرٌ وَالْحِصَانُ كَبِيرٌ</span> means:", options:["The donkey is big and the horse is small", "The donkey is small and the horse is big", "The donkey and horse are both big", "The donkey and horse are both small"], correct:1, explain:"صَغِيرٌ = small; كَبِيرٌ = big." },
+
+  // ---------------- Page 18 ----------------
+  { page:18, title:"<span class='q-arabic'>الْكُرْسِيُّ مَكْسُورٌ</span> means:", options:["The chair is new", "The chair is broken", "The chair is clean", "The chair is big"], correct:1, explain:"مَكْسُورٌ means 'broken'." },
+  { page:18, title:"<span class='q-arabic'>الْقَمَرُ جَمِيلٌ</span> means:", options:["The moon is far", "The moon is beautiful", "The star is beautiful", "The moon is small"], correct:1, explain:"جَمِيلٌ means 'beautiful'." },
+  { page:18, title:"<span class='q-arabic'>الْحَجَرُ ثَقِيلٌ وَالْوَرَقُ خَفِيفٌ</span> means:", options:["The stone is light and the paper is heavy", "The stone is heavy and the paper is light", "The stone and paper are both heavy", "The stone and paper are both light"], correct:1, explain:"ثَقِيلٌ = heavy; خَفِيفٌ = light." },
+  { page:18, title:"<span class='q-arabic'>الْبَيْتُ قَرِيبٌ وَالْمَسْجِدُ بَعِيدٌ</span> means:", options:["The house is far and the mosque is near", "The house is near and the mosque is far", "The house and mosque are both near", "The house and mosque are both far"], correct:1, explain:"قَرِيبٌ = near; بَعِيدٌ = far." },
+  { page:18, title:"<span class='q-arabic'>الْقَمِيصُ نَظِيفٌ</span> means:", options:["The shirt is dirty", "The shirt is clean", "The shirt is new", "The shirt is old"], correct:1, explain:"نَظِيفٌ means 'clean'." },
+  { page:18, title:"<span class='q-arabic'>اَللَّبَنُ حَارٌّ</span> means:", options:["The milk is cold", "The milk is hot", "The milk is sweet", "The milk is fresh"], correct:1, explain:"حَارٌّ means 'hot'." },
+
+  // ---------------- Page 19 ----------------
+  { page:19, title:"<span class='q-arabic'>اَللَّبَنُ بَارِدٌ</span> means:", options:["The milk is hot", "The milk is cold", "The milk is sweet", "The milk is sour"], correct:1, explain:"بَارِدٌ means 'cold'." },
+  { page:19, title:"<span class='q-arabic'>الْمُهَنْدِسُ جَالِسٌ وَالْمُدَرِّسُ وَاقِفٌ</span> means:", options:["The engineer is standing and the teacher is sitting", "The engineer is sitting and the teacher is standing", "Both are sitting", "Both are standing"], correct:1, explain:"جَالِسٌ = sitting; وَاقِفٌ = standing." },
+  { page:19, title:"<span class='q-arabic'>الْقَمَرُ بَعِيدٌ</span> means:", options:["The moon is near", "The moon is far", "The moon is beautiful", "The moon is small"], correct:1, explain:"بَعِيدٌ means 'far'." },
+  { page:19, title:"<span class='q-arabic'>الْمِنْدِيلُ نَظِيفٌ</span> means:", options:["The kerchief is dirty", "The kerchief is clean", "The kerchief is new", "The kerchief is small"], correct:1, explain:"نَظِيفٌ means 'clean'." },
+
+  // ---------------- Page 20 ----------------
+  { page:20, title:"Which word correctly completes: <span class='q-arabic'>الْبَابُ ____</span> (the door is open)?", options:["<span class='opt-arabic'>مَفْتُوحٌ</span>","<span class='opt-arabic'>وَسِخٌ</span>","<span class='opt-arabic'>حَارٌّ</span>","<span class='opt-arabic'>جَمِيلٌ</span>"], correct:0, explain:"مَفْتُوحٌ means 'open'." },
+  { page:20, title:"Which word correctly completes: <span class='q-arabic'>الْقَمَرُ ____</span> (the moon is beautiful)?", options:["<span class='opt-arabic'>جَمِيلٌ</span>","<span class='opt-arabic'>ثَقِيلٌ</span>","<span class='opt-arabic'>خَفِيفٌ</span>","<span class='opt-arabic'>حَارٌّ</span>"], correct:0, explain:"جَمِيلٌ means 'beautiful'." },
+  { page:20, title:"Which word is the opposite of <span class='opt-arabic'>نَظِيفٌ</span> (clean)?", options:["<span class='opt-arabic'>جَمِيلٌ</span>","<span class='opt-arabic'>وَسِخٌ</span>","<span class='opt-arabic'>خَفِيفٌ</span>","<span class='opt-arabic'>حَارٌّ</span>"], correct:1, explain:"وَسِخٌ means 'dirty', the opposite of نَظِيفٌ (clean)." },
+  { page:20, title:"Which word is the opposite of <span class='opt-arabic'>ثَقِيلٌ</span> (heavy)?", options:["<span class='opt-arabic'>خَفِيفٌ</span>","<span class='opt-arabic'>حَارٌّ</span>","<span class='opt-arabic'>وَسِخٌ</span>","<span class='opt-arabic'>جَمِيلٌ</span>"], correct:0, explain:"خَفِيفٌ means 'light', the opposite of ثَقِيلٌ (heavy)." },
+  { page:20, title:"Which word is the opposite of <span class='opt-arabic'>حَارٌّ</span> (hot)?", options:["<span class='opt-arabic'>بَارِدٌ</span>","<span class='opt-arabic'>وَسِخٌ</span>","<span class='opt-arabic'>جَمِيلٌ</span>","<span class='opt-arabic'>ثَقِيلٌ</span>"], correct:0, explain:"بَارِدٌ means 'cold', the opposite of حَارٌّ (hot)." },
+
+  // ---------------- Page 21 ----------------
+  { page:21, title:"<span class='opt-arabic'>وَسِخٌ</span> means:", options:["Clean", "Dirty", "New", "Old"], correct:1, explain:"وَسِخٌ means 'dirty'." },
+  { page:21, title:"<span class='opt-arabic'>صَغِيرٌ</span> means:", options:["Big", "Small", "Heavy", "Light"], correct:1, explain:"صَغِيرٌ means 'small'." },
+  { page:21, title:"<span class='opt-arabic'>ثَقِيلٌ</span> means:", options:["Light", "Heavy", "New", "Clean"], correct:1, explain:"ثَقِيلٌ means 'heavy'." },
+  { page:21, title:"<span class='q-arabic'>النَّجْمُ بَعِيدٌ</span> means:", options:["The star is near", "The star is far", "The star is beautiful", "The star is small"], correct:1, explain:"بَعِيدٌ means 'far'." },
+  { page:21, title:"<span class='q-arabic'>السُّكَّرُ حُلْوٌ</span> means:", options:["The sugar is sour", "The sugar is sweet", "The sugar is old", "The sugar is heavy"], correct:1, explain:"حُلْوٌ means 'sweet'." },
+  { page:21, title:"<span class='q-arabic'>الطَّالِبُ مَرِيضٌ</span> means:", options:["The student is happy", "The student is sick", "The student is tall", "The student is poor"], correct:1, explain:"مَرِيضٌ means 'sick'." },
+  { page:21, title:"<span class='q-arabic'>التَّاجِرُ غَنِيٌّ</span> means:", options:["The merchant is poor", "The merchant is rich", "The merchant is tall", "The merchant is sick"], correct:1, explain:"غَنِيٌّ means 'rich'." },
+  { page:21, title:"<span class='q-arabic'>الْوَلَدُ فَقِيرٌ</span> means:", options:["The boy is rich", "The boy is poor", "The boy is sick", "The boy is short"], correct:1, explain:"فَقِيرٌ means 'poor'." },
+  { page:21, title:"<span class='q-arabic'>الطَّبِيبُ طَوِيلٌ وَالْمُدَرِّسُ قَصِيرٌ</span> means:", options:["The doctor is short and the teacher is tall", "The doctor is tall and the teacher is short", "Both are tall", "Both are short"], correct:1, explain:"طَوِيلٌ = tall; قَصِيرٌ = short." },
+
+  // ---------------- Page 22 (adjectives exercise) ----------------
+  { page:22, title:"<span class='opt-arabic'>غَنِيٌّ</span> means:", options:["Poor", "Rich", "Sick", "Tall"], correct:1, explain:"غَنِيٌّ means 'rich'." },
+  { page:22, title:"<span class='opt-arabic'>مَرِيضٌ</span> means:", options:["Healthy", "Sick", "Tall", "Short"], correct:1, explain:"مَرِيضٌ means 'sick'." },
+  { page:22, title:"<span class='opt-arabic'>حُلْوٌ</span> means:", options:["Sour", "Sweet", "Bitter", "Salty"], correct:1, explain:"حُلْوٌ means 'sweet'." },
+  { page:22, title:"<span class='opt-arabic'>لَذِيذٌ</span> means:", options:["Bland", "Delicious", "Rotten", "Fresh"], correct:1, explain:"لَذِيذٌ means 'delicious'." },
+
+  // ---------------- Page 23 (matching exercise) ----------------
+  { page:23, title:"<span class='opt-arabic'>الدُّكَّانُ</span> means:", options:["School", "Shop", "House", "Market"], correct:1, explain:"الدُّكَّانُ means 'shop'." },
+  { page:23, title:"<span class='opt-arabic'>التُّفَّاحُ</span> means:", options:["Apple", "Bread", "Sugar", "Milk"], correct:0, explain:"التُّفَّاحُ means 'apple'." },
+  { page:23, title:"Which word is the opposite of <span class='opt-arabic'>غَنِيٌّ</span> (rich)?", options:["<span class='opt-arabic'>طَوِيلٌ</span>","<span class='opt-arabic'>فَقِيرٌ</span>","<span class='opt-arabic'>مَرِيضٌ</span>","<span class='opt-arabic'>قَصِيرٌ</span>"], correct:1, explain:"فَقِيرٌ means 'poor', the opposite of غَنِيٌّ (rich)." },
+  { page:23, title:"Which word is the opposite of <span class='opt-arabic'>طَوِيلٌ</span> (tall)?", options:["<span class='opt-arabic'>قَصِيرٌ</span>","<span class='opt-arabic'>غَنِيٌّ</span>","<span class='opt-arabic'>حُلْوٌ</span>","<span class='opt-arabic'>مَرِيضٌ</span>"], correct:0, explain:"قَصِيرٌ means 'short', the opposite of طَوِيلٌ (tall)." },
+
+  // ---------------- Page 24 (Sun & Moon Letters) ----------------
+  { page:24, title:"Which type of letters cause the ل of اَلْ to be assimilated (not pronounced separately)?", options:["Moon Letters", "Sun Letters", "Both equally", "Neither"], correct:1, explain:"With Sun (Solar) Letters, the ل of اَلْ assimilates into the following letter." },
+  { page:24, title:"Is the letter <span class='opt-arabic'>ب</span> (as in الباب) a Sun Letter or a Moon Letter?", options:["Sun Letter", "Moon Letter", "Neither", "Both"], correct:1, explain:"ب is a Moon (Lunar) Letter — the ل of اَلْ is pronounced clearly." },
+  { page:24, title:"Is the letter <span class='opt-arabic'>ش</span> (as in الشمس) a Sun Letter or a Moon Letter?", options:["Moon Letter", "Sun Letter", "Neither", "Both"], correct:1, explain:"ش is a Sun (Solar) Letter — the ل of اَلْ assimilates." },
+  { page:24, title:"How many Sun Letters and how many Moon Letters does Arabic have?", options:["10 and 18", "14 and 14", "20 and 8", "7 and 21"], correct:1, explain:"Arabic's 28 letters split evenly: 14 Sun Letters and 14 Moon Letters." },
+
+  // ---------------- Page 25 (applying the sun/moon rule) ----------------
+  { page:25, title:"Which of these words begins with a <b>Sun Letter</b>?", options:["<span class='opt-arabic'>الْقَمَرُ</span>","<span class='opt-arabic'>الشَّمْسُ</span>","<span class='opt-arabic'>الْبَابُ</span>","<span class='opt-arabic'>الْكِتَابُ</span>"], correct:1, explain:"الشَّمْسُ begins with ش, a Sun Letter, so it's pronounced ash-shamsu." },
+  { page:25, title:"In <span class='q-arabic'>الشَّمْسُ</span>, how is the ل of اَلْ actually pronounced?", options:["Clearly, as 'al-shamsu'", "It is silent/assimilated, pronounced 'ash-shamsu'", "It becomes 'in-shamsu'", "It is dropped entirely with no trace"], correct:1, explain:"Before a Sun Letter, the ل assimilates and is not pronounced separately." },
+  { page:25, title:"In <span class='q-arabic'>الْبَابُ</span> (a Moon Letter word), is the ل of اَلْ pronounced?", options:["Yes, clearly", "No, it assimilates", "Only in writing", "Only in poetry"], correct:0, explain:"With Moon Letters, the ل of اَلْ is pronounced normally: al-bābu." },
+
+  // ---------------- Page 26 (Points to Remember – Sun/Moon rule) ----------------
+  { page:26, title:"When اَلْ is prefixed to a noun, what happens to the indefinite tanwin ending?", options:["It stays the same", "It is dropped", "It doubles", "It becomes a question marker"], correct:1, explain:"Adding the definite article اَلْ naturally removes the indefinite tanwin (-n) ending." },
+  { page:26, title:"<span class='opt-arabic'>al-najmu</span> becomes, with a Sun Letter noun that follows a preceding word:", options:["al-najmu (unchanged)", "an-najmu", "am-najmu", "as-najmu"], correct:1, explain:"ن is a Sun Letter, so al-najmu is pronounced an-najmu." },
+  { page:26, title:"<span class='opt-arabic'>al-rajulu</span> is correctly pronounced:", options:["al-rajulu", "ar-rajulu", "am-rajulu", "an-rajulu"], correct:1, explain:"ر is a Sun Letter, so al-rajulu becomes ar-rajulu." },
+  { page:26, title:"The assimilation of ل before a Sun Letter is indicated in writing by:", options:["An extra alif", "A shaddah on the first letter of the noun", "A hamza", "Nothing — writing never shows it"], correct:1, explain:"Although pronunciation changes, spelling stays the same; the shaddah marks the assimilation." },
+
+  // ---------------- Page 27 (Points to Remember – hamzatu l-wasl, adjectives) ----------------
+  { page:27, title:"The initial vowel of اَلْ that is dropped in pronunciation when preceded by another word is called:", options:["Hamzatu l-qat'", "Hamzatu l-wasl", "Tanwin", "Shaddah"], correct:1, explain:"This connecting vowel drop is called hamzatu l-wasl." },
+  { page:27, title:"Which word is the opposite of <span class='opt-arabic'>جَدِيدٌ</span> (new)?", options:["<span class='opt-arabic'>قَدِيمٌ</span>","<span class='opt-arabic'>نَظِيفٌ</span>","<span class='opt-arabic'>قَرِيبٌ</span>","<span class='opt-arabic'>كَبِيرٌ</span>"], correct:0, explain:"قَدِيمٌ means 'old', the opposite of جَدِيدٌ (new)." },
+  { page:27, title:"Which word is the opposite of <span class='opt-arabic'>قَرِيبٌ</span> (near)?", options:["<span class='opt-arabic'>بَعِيدٌ</span>","<span class='opt-arabic'>صَغِيرٌ</span>","<span class='opt-arabic'>وَسِخٌ</span>","<span class='opt-arabic'>خَفِيفٌ</span>"], correct:0, explain:"بَعِيدٌ means 'far', the opposite of قَرِيبٌ (near)." },
+  { page:27, title:"Which word is the opposite of <span class='opt-arabic'>صَغِيرٌ</span> (small)?", options:["<span class='opt-arabic'>كَبِيرٌ</span>","<span class='opt-arabic'>قَدِيمٌ</span>","<span class='opt-arabic'>خَفِيفٌ</span>","<span class='opt-arabic'>جَمِيلٌ</span>"], correct:0, explain:"كَبِيرٌ means 'big', the opposite of صَغِيرٌ (small)." },
+
+  // ---------------- Page 28 (Lesson Four – في / على) ----------------
+  { page:28, title:"<span class='q-arabic'>فِي</span> means:", options:["On", "In", "From", "To"], correct:1, explain:"فِي means 'in'." },
+  { page:28, title:"<span class='q-arabic'>عَلَى</span> means:", options:["In", "On", "Under", "Behind"], correct:1, explain:"عَلَى means 'on'." },
+  { page:28, title:"<span class='q-arabic'>اَلْبَيْتُ: فِي الْبَيْتِ</span> means:", options:["The house; on the house", "The house; in the house", "A house; from the house", "The house; to the house"], correct:1, explain:"فِي الْبَيْتِ means 'in the house'." },
+  { page:28, title:"<span class='q-arabic'>اَلْمَكْتَبُ: عَلَى الْمَكْتَبِ</span> means:", options:["The desk; on the desk", "The desk; in the desk", "The desk; under the desk", "The desk; near the desk"], correct:0, explain:"عَلَى الْمَكْتَبِ means 'on the desk'." },
+
+  // ---------------- Page 29 (exercise – أين questions) ----------------
+  { page:29, title:"<span class='q-arabic'>أَيْنَ الْكِتَابُ؟</span> means:", options:["What is the book?", "Where is the book?", "Whose book is it?", "Is this a book?"], correct:1, explain:"أَيْنَ means 'where'." },
+  { page:29, title:"<span class='q-arabic'>أَيَاسِرٌ فِي الْمَطْبَخِ؟</span> is asking:", options:["Is Yasir in the kitchen?", "Where is Yasir?", "Who is in the kitchen?", "Is Yasir a cook?"], correct:0, explain:"The أَ + statement pattern makes a yes/no question: 'Is Yasir in the kitchen?'" },
+  { page:29, title:"<span class='q-arabic'>مَاذَا عَلَى الْمَكْتَبِ؟</span> means:", options:["Who is on the desk?", "What is on the desk?", "Where is the desk?", "Is this a desk?"], correct:1, explain:"مَاذَا means 'what', asking what object is on the desk." },
+
+  // ---------------- Page 30 (exercise – في/على sentences) ----------------
+  { page:30, title:"<span class='q-arabic'>الطَّالِبُ فِي الْجَامِعَةِ</span> means:", options:["The student is in the school", "The student is at the university", "The student is in the classroom", "The student is at home"], correct:1, explain:"الْجَامِعَةِ means 'university'." },
+  { page:30, title:"<span class='q-arabic'>أَيْنَ التَّاجِرُ؟ هُوَ فِي الدُّكَّانِ</span> means:", options:["Where is the merchant? He is at home", "Where is the merchant? He is in the shop", "Who is the merchant? He is rich", "Where is the shop? It is far"], correct:1, explain:"الدُّكَّانِ means 'shop'." },
+  { page:30, title:"<span class='q-arabic'>الشَّمْسُ وَالْقَمَرُ فِي السَّمَاءِ</span> means:", options:["The sun and moon are far away", "The sun and moon are beautiful", "The sun and the moon are in the sky", "The sun is bright and the moon is dim"], correct:2, explain:"السَّمَاءِ means 'sky'." },
+
+  // ---------------- Page 31 (proper nouns & gender) ----------------
+  { page:31, title:"Which of these is a <b>feminine</b> proper noun?", options:["<span class='opt-arabic'>مُحَمَّدٌ</span>","<span class='opt-arabic'>خَالِدٌ</span>","<span class='opt-arabic'>فَاطِمَةُ</span>","<span class='opt-arabic'>عَلِيٌّ</span>"], correct:2, explain:"فَاطِمَةُ ends in ة, a typical feminine name ending." },
+  { page:31, title:"Feminine proper nouns typically end with which letter?", options:["ب (ba)", "ة (round ta)", "ن (nun)", "ل (lam)"], correct:1, explain:"Feminine proper nouns commonly end with the round ta (ة)." },
+  { page:31, title:"True or false: Feminine proper nouns take tanwin, just like common nouns.", options:["True", "False"], correct:1, explain:"Feminine proper nouns like فَاطِمَةُ, آمِنَةُ do NOT take tanwin." },
+
+  // ---------------- Page 32 (من / إلى — from / to) ----------------
+  { page:32, title:"<span class='q-arabic'>مِنْ أَيْنَ أَنْتَ؟</span> means:", options:["Where do you live?", "Where are you from?", "Who are you?", "Where are you going?"], correct:1, explain:"مِنْ أَيْنَ أَنْتَ؟ = 'Where are you from?'" },
+  { page:32, title:"<span class='q-arabic'>أَنَا مِنَ الْيَابَانِ</span> means:", options:["I am going to Japan", "I am in Japan", "I am from Japan", "I like Japan"], correct:2, explain:"مِنَ الْيَابَانِ means 'from Japan'." },
+  { page:32, title:"<span class='opt-arabic'>إِلَى</span> means:", options:["From", "To / towards", "In", "On"], correct:1, explain:"إِلَى means 'to' or 'towards'." },
+  { page:32, title:"<span class='opt-arabic'>مِنْ</span> means:", options:["To", "On", "From", "Under"], correct:2, explain:"مِنْ means 'from'." },
+
+  // ---------------- Page 33 (exercise – countries, read/write) ----------------
+  { page:33, title:"<span class='opt-arabic'>الْيَابَانُ</span> means:", options:["China", "India", "Japan", "The Philippines"], correct:2, explain:"الْيَابَانُ means 'Japan'." },
+  { page:33, title:"<span class='opt-arabic'>الْفِلِبِّينُ</span> means:", options:["The Philippines", "Japan", "India", "China"], correct:0, explain:"الْفِلِبِّينُ means 'the Philippines'." },
+  { page:33, title:"<span class='q-arabic'>خَرَجَ الْمُدَرِّسُ مِنَ الْفَصْلِ وَذَهَبَ إِلَى الْمُدِيرِ</span> means:", options:["The teacher entered the classroom and left the principal", "The teacher left the classroom and went to the principal", "The principal left and went to the classroom", "The teacher stayed in the classroom"], correct:1, explain:"خَرَجَ = 'went out/left'; ذَهَبَ إِلَى = 'went to'." },
+
+  // ---------------- Page 34 (fill blank prepositions + new words) ----------------
+  { page:34, title:"Complete: <span class='q-arabic'>الْكِتَابُ ____ الْمَكْتَبِ</span> (the book is on the desk)", options:["<span class='opt-arabic'>مِنْ</span>","<span class='opt-arabic'>عَلَى</span>","<span class='opt-arabic'>إِلَى</span>","<span class='opt-arabic'>وَ</span>"], correct:1, explain:"عَلَى (on) fits: 'the book is on the desk'." },
+  { page:34, title:"Complete: <span class='q-arabic'>ذَهَبَ حَامِدٌ ____ الْجَامِعَةِ</span> (Hamid went to the university)", options:["<span class='opt-arabic'>مِنْ</span>","<span class='opt-arabic'>فِي</span>","<span class='opt-arabic'>إِلَى</span>","<span class='opt-arabic'>عَلَى</span>"], correct:2, explain:"إِلَى (to) fits: 'Hamid went to the university'." },
+  { page:34, title:"Which word means <b>\"market\"</b>?", options:["<span class='opt-arabic'>السُّوقُ</span>","<span class='opt-arabic'>الْمَدْرَسَةُ</span>","<span class='opt-arabic'>الْجَامِعَةُ</span>","<span class='opt-arabic'>الدُّكَّانُ</span>"], correct:0, explain:"السُّوقُ means 'market'." },
+  { page:34, title:"Which word means <b>\"university\"</b>?", options:["<span class='opt-arabic'>الْمَدْرَسَةُ</span>","<span class='opt-arabic'>الْجَامِعَةُ</span>","<span class='opt-arabic'>الْفَصْلُ</span>","<span class='opt-arabic'>السُّوقُ</span>"], correct:1, explain:"الْجَامِعَةُ means 'university'." },
+
+  // ---------------- Page 35 (Points to Remember – case endings, هو) ----------------
+  { page:35, title:"The normal (nominative) ending of an Arabic noun is:", options:["-a", "-u", "-i", "-an"], correct:1, explain:"The nominative case ending is '-u', called مَرْفُوعٌ." },
+  { page:35, title:"After a preposition, a noun's case ending changes to:", options:["-u (nominative)", "-i (genitive)", "-a (accusative)", "No change occurs"], correct:1, explain:"A noun following a preposition takes the genitive '-i' ending, called مَجْرُورٌ." },
+  { page:35, title:"<span class='opt-arabic'>هُوَ</span> means:", options:["She / it (feminine)", "He / it (masculine)", "They", "You"], correct:1, explain:"هُوَ refers to a masculine noun, whether person, animal, or thing." },
+
+  // ---------------- Page 36 (هي feminine pronoun + vocab) ----------------
+  { page:36, title:"<span class='opt-arabic'>هِيَ</span> means:", options:["He / it (masculine)", "She / it (feminine)", "You", "We"], correct:1, explain:"هِيَ refers to a feminine noun, whether person, animal, or thing." },
+  { page:36, title:"<span class='q-arabic'>أَيْنَ آمِنَةُ؟ هِيَ فِي الْبَيْتِ</span> means:", options:["Where is Aminah? He is in the house", "Where is Aminah? She is in the house", "Where is the house? It is far", "Who is Aminah? A student"], correct:1, explain:"هِيَ (she) is used because آمِنَةُ is feminine." },
+  { page:36, title:"Which word means <b>\"sky\"</b>?", options:["<span class='opt-arabic'>السَّمَاءُ</span>","<span class='opt-arabic'>الْأَرْضُ</span>","<span class='opt-arabic'>الْقَمَرُ</span>","<span class='opt-arabic'>النَّجْمُ</span>"], correct:0, explain:"السَّمَاءُ means 'sky'." },
+  { page:36, title:"Which word means <b>\"kitchen\"</b>?", options:["<span class='opt-arabic'>الْحَمَّامُ</span>","<span class='opt-arabic'>الْمَطْبَخُ</span>","<span class='opt-arabic'>الْفَصْلُ</span>","<span class='opt-arabic'>الْغُرْفَةُ</span>"], correct:1, explain:"الْمَطْبَخُ means 'kitchen'." },
+
+  // ---------------- Page 37 (Lesson Five – idafa / possessive, تحت) ----------------
+  { page:37, title:"<span class='opt-arabic'>تَحْتَ</span> means:", options:["On top of", "Under", "Behind", "Next to"], correct:1, explain:"تَحْتَ means 'under'." },
+  { page:37, title:"<span class='q-arabic'>أَيْنَ كِتَابُ مُحَمَّدٍ؟ هُوَ تَحْتَ الْمَكْتَبِ هُنَاكَ</span> means:", options:["Where is Muhammad's book? It is on the desk there", "Where is Muhammad's book? It is under the desk there", "Where is Muhammad? He is under the desk", "Where is the desk? It is there"], correct:1, explain:"تَحْتَ الْمَكْتَبِ means 'under the desk'." },
+  { page:37, title:"<span class='q-arabic'>هَذَا قَلَمُ الْمُدَرِّسِ</span> means:", options:["This is a pen for the teacher", "This is the teacher's pen", "This pen is broken", "This is a new pen"], correct:1, explain:"قَلَمُ الْمُدَرِّسِ (idafa/possessive construction) means 'the teacher's pen'." },
+
+  // ---------------- Page 38 (idafa exercise) ----------------
+  { page:38, title:"Combining <span class='opt-arabic'>كِتَابٌ</span> + <span class='opt-arabic'>مُحَمَّدٌ</span> in the possessive (idafa) form gives:", options:["<span class='opt-arabic'>كِتَابُ مُحَمَّدٍ</span>","<span class='opt-arabic'>كِتَابٌ مُحَمَّدٌ</span>","<span class='opt-arabic'>الْكِتَابُ مُحَمَّدٌ</span>","<span class='opt-arabic'>مُحَمَّدٌ كِتَابٌ</span>"], correct:0, explain:"In idafa, the first noun drops its tanwin and the second is genitive: كِتَابُ مُحَمَّدٍ ('Muhammad's book')." },
+  { page:38, title:"Combining <span class='opt-arabic'>بَيْتٌ</span> + <span class='opt-arabic'>عَبَّاسٌ</span> in the possessive form gives:", options:["<span class='opt-arabic'>بَيْتُ عَبَّاسٍ</span>","<span class='opt-arabic'>بَيْتٌ عَبَّاسٌ</span>","<span class='opt-arabic'>عَبَّاسٌ بَيْتٌ</span>","<span class='opt-arabic'>الْبَيْتُ عَبَّاسٍ</span>"], correct:0, explain:"بَيْتُ عَبَّاسٍ means \"'Abbas's house.\"" },
+  { page:38, title:"The grammatical construction of joining two nouns to show possession (like 'the teacher's pen') is called:", options:["Tanwin", "Idafa (possessive construction)", "Hamzatu l-wasl", "Tashdid"], correct:1, explain:"This construction, placing one noun directly after another, is called idafa (إِضَافَة)." },
+
+  // ---------------- Page 39 (idafa phrases, religious phrases) ----------------
+  { page:39, title:"<span class='q-arabic'>الْقُرْآنُ كِتَابُ اللهِ</span> means:", options:["The Quran is an old book", "The Quran is the book of God", "The Quran is in Arabic", "The Quran is a long book"], correct:1, explain:"كِتَابُ اللهِ (idafa) means 'the book of God'." },
+  { page:39, title:"<span class='q-arabic'>الْكَعْبَةُ بَيْتُ اللهِ</span> means:", options:["The Kaaba is a big building", "The Kaaba is the house of God", "The Kaaba is in Makkah", "The Kaaba is very old"], correct:1, explain:"بَيْتُ اللهِ means 'the house of God'." },
+  { page:39, title:"<span class='q-arabic'>أَيْنَ مَسْجِدُ رَسُولِ اللهِ؟ هُوَ فِي الْمَدِينَةِ الْمُنَوَّرَةِ</span> means:", options:["Where is the mosque of the Messenger of God? It is in Makkah", "Where is the mosque of the Messenger of God? It is in Madinah al-Munawwarah", "Who is the Messenger of God?", "Where is Madinah?"], correct:1, explain:"الْمَدِينَةِ الْمُنَوَّرَةِ is 'Madinah al-Munawwarah', where the Prophet's mosque is located." },
+
+  // ---------------- Page 40 (more idafa sentences + fill blanks) ----------------
+  { page:40, title:"<span class='q-arabic'>بَابُ الْمَسْجِدِ مَفْتُوحٌ وَبَابُ الْمَدْرَسَةِ مُغْلَقٌ</span> means:", options:["The mosque door is closed and the school door is open", "The mosque door is open and the school door is closed", "Both doors are open", "Both doors are closed"], correct:1, explain:"مَفْتُوحٌ = open; مُغْلَقٌ = closed." },
+  { page:40, title:"<span class='q-arabic'>سَيَّارَةُ عَبَّاسٍ فِي الشَّارِعِ</span> means:", options:["'Abbas is in the street", "'Abbas's car is in the street", "The street belongs to 'Abbas", "'Abbas is a driver"], correct:1, explain:"سَيَّارَةُ عَبَّاسٍ (idafa) means \"'Abbas's car.\"" },
+  { page:40, title:"Complete: <span class='q-arabic'>أَنَا ____ الْمُدَرِّسِ</span> (I am the teacher's son)", options:["<span class='opt-arabic'>بِنْتُ</span>","<span class='opt-arabic'>ابْنُ</span>","<span class='opt-arabic'>بَيْتُ</span>","<span class='opt-arabic'>كِتَابُ</span>"], correct:1, explain:"ابْنُ الْمُدَرِّسِ (idafa) means 'the teacher's son'." },
+
+  // ---------------- Page 41 (vocative particle يا) ----------------
+  { page:41, title:"The particle <span class='q-arabic'>يَا</span> is used to:", options:["Negate a sentence", "Address or call someone (vocative)", "Show possession", "Ask a question"], correct:1, explain:"يَا is the vocative particle, used when calling or addressing someone." },
+  { page:41, title:"<span class='q-arabic'>يَا مُحَمَّدُ</span> means:", options:["This is Muhammad", "O Muhammad! (calling him)", "Muhammad's book", "Where is Muhammad?"], correct:1, explain:"يَا + name is used to call out to someone: 'O Muhammad!'" },
+  { page:41, title:"Which of these correctly uses the vocative particle to address 'Ali?", options:["<span class='opt-arabic'>عَلِيٌّ يَا</span>","<span class='opt-arabic'>يَا عَلِيُّ</span>","<span class='opt-arabic'>عَلِيُّ</span>","<span class='opt-arabic'>الْعَلِيُّ</span>"], correct:1, explain:"يَا عَلِيُّ ('O Ali!') correctly places يَا before the name being called." },
+
+  // ---------------- Page 42 (اسم / ابن, hamzatu l-wasl exercise) ----------------
+  { page:42, title:"<span class='opt-arabic'>اِسْمٌ</span> means:", options:["Son", "Name", "House", "Book"], correct:1, explain:"اِسْمٌ means 'name'." },
+  { page:42, title:"<span class='opt-arabic'>اِبْنٌ</span> means:", options:["Daughter", "Son", "Brother", "Father"], correct:1, explain:"اِبْنٌ means 'son'." },
+  { page:42, title:"<span class='q-arabic'>اِبْنُ خَالِدٍ فِي الْمَدْرَسَةِ</span> means:", options:["Khalid is in the school", "Khalid's son is in the school", "Khalid's father is a teacher", "Khalid went to school"], correct:1, explain:"اِبْنُ خَالِدٍ (idafa) means 'Khalid's son'." },
+  { page:42, title:"The words <span class='opt-arabic'>اِسْمٌ</span> and <span class='opt-arabic'>اِبْنٌ</span> both begin with:", options:["Hamzatu l-qat'", "Hamzatu l-wasl", "A sun letter", "A moon letter"], correct:1, explain:"Both words commence with hamzatu l-wasl, whose initial vowel drops when preceded by a word." },
+
+  // ---------------- Page 43 (Points to Remember – mudaf/mudaf ilaihi) ----------------
+  { page:43, title:"In <span class='q-arabic'>كِتَابُ بِلَالٍ</span> ('Bilal's book'), which word is the <b>mudaf</b> (thing possessed)?", options:["<span class='opt-arabic'>كِتَابُ</span>","<span class='opt-arabic'>بِلَالٍ</span>","Both together","Neither"], correct:0, explain:"كِتَابُ is the mudaf (possessed item); بِلَالٍ is the mudaf ilaihi (possessor)." },
+  { page:43, title:"The mudaf (first noun in an idafa construction) takes:", options:["The definite article اَلْ", "Tanwin only", "Neither the definite nor indefinite article", "Both the definite and indefinite article"], correct:2, explain:"The mudaf is definite by position and needs neither اَلْ nor tanwin." },
+  { page:43, title:"The mudaf ilaihi (the possessor, second noun) is always in which case?", options:["Nominative", "Genitive", "Accusative", "No case at all"], correct:1, explain:"The mudaf ilaihi takes the genitive case (مَجْرُورٌ)." },
+  { page:43, title:"In <span class='q-arabic'>تَحْتَ الْمَكْتَبِ</span>, why is الْمَكْتَبِ in the genitive case?", options:["Because it follows a preposition only", "Because it is the mudaf ilaihi after تَحْتَ", "Because it is plural", "Because it is indefinite"], correct:1, explain:"تَحْتَ is followed by a mudaf ilaihi, so the noun takes the genitive ending." },
+
+  // ---------------- Page 44 (vocative examples + vocabulary) ----------------
+  { page:44, title:"Which is the correct way to call Bilal using the vocative particle?", options:["<span class='opt-arabic'>يَا بِلَالٌ</span>","<span class='opt-arabic'>يَا بِلَالُ</span>","<span class='opt-arabic'>بِلَالٌ يَا</span>","<span class='opt-arabic'>يَا بِلَالَ</span>"], correct:1, explain:"After يَا, the noun takes a single dammah with no tanwin: يَا بِلَالُ." },
+  { page:44, title:"<span class='opt-arabic'>الرَّسُولُ</span> means:", options:["The teacher", "The messenger", "The merchant", "The doctor"], correct:1, explain:"الرَّسُولُ means 'the messenger'." },
+  { page:44, title:"<span class='opt-arabic'>الْعَمُّ</span> means:", options:["Maternal uncle", "Paternal uncle", "Brother", "Grandfather"], correct:1, explain:"الْعَمُّ means 'paternal uncle' (father's brother)." },
+  { page:44, title:"<span class='opt-arabic'>الْخَالُ</span> means:", options:["Paternal uncle", "Maternal uncle", "Cousin", "Nephew"], correct:1, explain:"الْخَالُ means 'maternal uncle' (mother's brother)." },
+
+  // ---------------- Page 45 (Lesson Six – هذه) ----------------
+  { page:45, title:"<span class='q-arabic'>هَذِهِ</span> means:", options:["This (masculine)", "This (feminine)", "That (feminine)", "These"], correct:1, explain:"هَذِهِ is the feminine form of هَذَا, meaning 'this'." },
+  { page:45, title:"<span class='q-arabic'>هَذَا ابْنُ حَامِدٍ وَهَذِهِ بِنْتُ يَاسِرٍ</span> means:", options:["This is Hamid's son and this is Yasir's daughter", "This is Hamid's daughter and this is Yasir's son", "This is Hamid and this is Yasir", "This is Hamid's house and this is Yasir's car"], correct:0, explain:"ابْنُ حَامِدٍ = Hamid's son; بِنْتُ يَاسِرٍ = Yasir's daughter." },
+  { page:45, title:"<span class='q-arabic'>مَنْ هَذِهِ؟ هَذِهِ أُخْتُ الْمُهَنْدِسِ</span> means:", options:["Who is this? This is the engineer's brother", "Who is this? This is the engineer's sister", "Who is this? This is an engineer", "What is this? An engineering tool"], correct:1, explain:"أُخْتُ الْمُهَنْدِسِ means 'the engineer's sister'." },
+  { page:45, title:"<span class='opt-arabic'>الْمِكْوَاةُ</span> means:", options:["The spoon", "The iron (for clothes)", "The pot", "The bicycle"], correct:1, explain:"الْمِكْوَاةُ means 'the (clothes) iron'." },
+
+  // ---------------- Page 46 (possessions, body parts, animals) ----------------
+  { page:46, title:"<span class='q-arabic'>أَدَرَّاجَةُ أَنَسٍ هَذِهِ؟ لَا، هَذِهِ دَرَّاجَةُ عَمَّارٍ</span> means:", options:["Is this Anas's bicycle? Yes, it is", "Is this Anas's bicycle? No, this is 'Ammar's bicycle", "Is this a new bicycle?", "Whose bicycle is this?"], correct:1, explain:"The answer corrects the ownership to 'Ammar's bicycle." },
+  { page:46, title:"<span class='q-arabic'>هَذِهِ بَقَرَةُ الْفَلَّاحِ</span> means:", options:["This is the farmer's house", "This is the farmer's cow", "This is a farmer", "The farmer has a cow"], correct:1, explain:"بَقَرَةُ الْفَلَّاحِ means 'the farmer's cow'." },
+  { page:46, title:"<span class='opt-arabic'>الْمِلْعَقَةُ</span> means:", options:["The pot", "The spoon", "The plate", "The knife"], correct:1, explain:"الْمِلْعَقَةُ means 'the spoon'." },
+  { page:46, title:"Which word means <b>\"ear\"</b>?", options:["<span class='opt-arabic'>عَيْنٌ</span>","<span class='opt-arabic'>أُذُنٌ</span>","<span class='opt-arabic'>أَنْفٌ</span>","<span class='opt-arabic'>فَمٌ</span>"], correct:1, explain:"أُذُنٌ means 'ear'." },
+
+  // ---------------- Page 47 (Read and write + pattern exercise) ----------------
+  { page:47, title:"<span class='q-arabic'>هَذَا دِيكٌ وَهَذِهِ دَجَاجَةٌ</span> means:", options:["This is a hen and this is a rooster", "This is a rooster and this is a hen", "This is a duck and this is an egg", "This is a cow and this is a hen"], correct:1, explain:"دِيكٌ = rooster (masc.); دَجَاجَةٌ = hen (fem.)." },
+  { page:47, title:"<span class='q-arabic'>أَيْنَ قِدْرُ اللَّحْمِ؟ هِيَ فِي الثَّلَّاجَةِ</span> means:", options:["Where is the meat pot? It is on the stove", "Where is the meat pot? It is in the refrigerator", "Where is the meat? It is delicious", "Where is the kitchen?"], correct:1, explain:"الثَّلَّاجَةِ means 'the refrigerator'." },
+  { page:47, title:"Following the pattern مُحَمَّدٌ طَالِبٌ. حَامِدٌ طَبِيبٌ, how would you say 'Aminah is a (female) student'?", options:["<span class='opt-arabic'>آمِنَةُ طَالِبٌ</span>","<span class='opt-arabic'>آمِنَةُ طَالِبَةٌ</span>","<span class='opt-arabic'>آمِنَةُ طَبِيبَةٌ</span>","<span class='opt-arabic'>هَذِهِ طَالِبَةٌ</span>"], correct:1, explain:"The feminine of طَالِبٌ is طَالِبَةٌ, matching the feminine subject آمِنَةُ." },
+
+  // ---------------- Page 48 (feminine adjective agreement, fill-blanks) ----------------
+  { page:48, title:"Given <span class='q-arabic'>الشَّايُ حَارٌّ</span> (the tea is hot), how would you say 'the coffee is hot' (الْقَهْوَةُ is feminine)?", options:["<span class='opt-arabic'>الْقَهْوَةُ حَارٌّ</span>","<span class='opt-arabic'>الْقَهْوَةُ حَارَّةٌ</span>","<span class='opt-arabic'>الْقَهْوَةُ حَارٌّة</span>","<span class='opt-arabic'>حَارَّةٌ الْقَهْوَةُ</span>"], correct:1, explain:"Adjectives must agree in gender: حَارَّةٌ is the feminine form of حَارٌّ." },
+  { page:48, title:"Given <span class='q-arabic'>الْحِصَانُ سَرِيعٌ</span> (the horse is fast), how would you say 'the car is fast' (السَّيَّارَةُ is feminine)?", options:["<span class='opt-arabic'>السَّيَّارَةُ سَرِيعٌ</span>","<span class='opt-arabic'>السَّيَّارَةُ سَرِيعَةٌ</span>","<span class='opt-arabic'>سَرِيعٌ السَّيَّارَةُ</span>","<span class='opt-arabic'>السَّيَّارَةُ سَرِيعُونَ</span>"], correct:1, explain:"سَرِيعَةٌ is the feminine form of سَرِيعٌ, agreeing with السَّيَّارَةُ." },
+  { page:48, title:"Given <span class='q-arabic'>الْقَمَرُ جَمِيلٌ</span> (the moon is beautiful), how would you say 'the sun is beautiful' (الشَّمْسُ is feminine)?", options:["<span class='opt-arabic'>الشَّمْسُ جَمِيلٌ</span>","<span class='opt-arabic'>الشَّمْسُ جَمِيلَةٌ</span>","<span class='opt-arabic'>جَمِيلَةٌ الشَّمْسُ</span>","<span class='opt-arabic'>الشَّمْسُ جَمِيلَاتٌ</span>"], correct:1, explain:"جَمِيلَةٌ agrees in gender with the feminine noun الشَّمْسُ." },
+
+  // ---------------- Page 49 (vocabulary – kitchen/body/family) ----------------
+  { page:49, title:"<span class='opt-arabic'>الثَّلَّاجَةُ</span> means:", options:["The oven", "The refrigerator", "The kitchen", "The window"], correct:1, explain:"الثَّلَّاجَةُ means 'the refrigerator'." },
+  { page:49, title:"<span class='opt-arabic'>الْقِدْرُ</span> means:", options:["The plate", "The pot", "The spoon", "The cup"], correct:1, explain:"الْقِدْرُ means 'the pot'." },
+  { page:49, title:"<span class='q-arabic'>اَلْحَمْدُ لِلَّهِ</span> means:", options:["God is great", "Praise belongs to God", "In the name of God", "God willing"], correct:1, explain:"اَلْحَمْدُ لِلَّهِ means 'Praise belongs to God'." },
+  { page:49, title:"<span class='opt-arabic'>جِدًّا</span> means:", options:["Also", "Very", "Always", "Never"], correct:1, explain:"جِدًّا means 'very', as in هَذَا كَبِيرٌ جِدًّا ('this is very big')." },
+
+  // ---------------- Page 50 (Points to Remember – feminine gender rules) ----------------
+  { page:50, title:"هَذِهِ is pronounced hâdhihi, but which letter is omitted in writing?", options:["The ha", "The dal", "The alif", "The ya"], correct:2, explain:"Like هَذَا, the alif is dropped in writing though it is pronounced." },
+  { page:50, title:"Nouns and adjectives are typically made feminine by adding:", options:["A tanwin", "ة (ta marbuta) at the end", "The prefix اَلْ", "A shaddah"], correct:1, explain:"Adding ة at the end makes a masculine noun/adjective feminine, e.g. مُدَرِّسٌ → مُدَرِّسَةٌ." },
+  { page:50, title:"Which word means <b>\"daughter\"</b> — a separate feminine form, not made with ة?", options:["<span class='opt-arabic'>بِنْتٌ</span>","<span class='opt-arabic'>طَالِبَةٌ</span>","<span class='opt-arabic'>مُدَرِّسَةٌ</span>","<span class='opt-arabic'>أُخْتٌ</span>"], correct:0, explain:"بِنْتٌ ('daughter') is a separate word, not derived from اِبْنٌ ('son') by adding ة." },
+  { page:50, title:"According to this lesson, double members of the body (like hand, eye) are usually:", options:["Masculine", "Feminine", "Neither masculine nor feminine", "Always plural"], correct:1, explain:"Double body parts (يَدٌ hand, عَيْنٌ eye, أُذُنٌ ear, رِجْلٌ foot) are usually feminine, while single ones (رَأْسٌ head, أَنْفٌ nose, فَمٌ mouth) are masculine." },
+
+  // ---------------- Page 51 (ل preposition, لمن, أيضا, جدا) ----------------
+  { page:51, title:"The preposition <span class='q-arabic'>لِ</span> means:", options:["In / on", "Belongs to / for", "From / to", "Under / behind"], correct:1, explain:"لِ means 'belongs to' or 'for', as in هَذَا لِبِلَالٍ ('this belongs to Bilal')." },
+  { page:51, title:"<span class='q-arabic'>لِمَنْ</span> means:", options:["Where is", "Who is", "Whose / belonging to whom", "What is"], correct:2, explain:"لِمَنْ هَذَا؟ means 'Whose is this?'" },
+  { page:51, title:"The word اللَّهُ becomes لِلَّهِ ('belonging to God') by:", options:["Adding a new lam", "Just dropping the alif", "Adding tanwin", "Changing the shaddah"], correct:1, explain:"لِلَّهِ is formed simply by dropping the alif of اللَّهُ — no extra lam is needed." },
+  { page:51, title:"<span class='opt-arabic'>أَيْضًا</span> means:", options:["Very", "Also", "Never", "Always"], correct:1, explain:"أَيْضًا means 'also', as in وَذَلِكَ أَيْضًا جَمِيلٌ ('and that is also beautiful')." },
+
+  // ---------------- Page 52 (Lesson Seven – تلك) ----------------
+  { page:52, title:"<span class='q-arabic'>مَنْ هَذِهِ؟ هَذِهِ آمِنَةُ. وَمَنْ تِلْكَ؟ تِلْكَ فَاطِمَةُ</span> means:", options:["Who is this? This is Aminah. And who is that? That is Fatimah", "Who is this? This is Fatimah. And who is that? That is Aminah", "Where is Aminah? She is with Fatimah", "This is Aminah's sister, Fatimah"], correct:0, explain:"هَذِهِ (this, near) = Aminah; تِلْكَ (that, far) = Fatimah." },
+  { page:52, title:"<span class='q-arabic'>هَذِهِ طَبِيبَةٌ وَتِلْكَ مُمَرِّضَةٌ</span> means:", options:["This is a nurse and that is a doctor", "This is a (female) doctor and that is a nurse", "Both are doctors", "Both are nurses"], correct:1, explain:"طَبِيبَةٌ = female doctor; مُمَرِّضَةٌ = nurse." },
+  { page:52, title:"<span class='q-arabic'>أَتِلْكَ دَجَاجَةٌ؟ لَا، تِلْكَ بَطَّةٌ</span> means:", options:["Is that a duck? No, that is a hen", "Is that a hen? No, that is a duck", "Is that a rooster? Yes", "Is this a hen?"], correct:1, explain:"The correction identifies the animal as بَطَّةٌ (duck), not دَجَاجَةٌ (hen)." },
+
+  // ---------------- Page 53 (تلك sentences, exercise) ----------------
+  { page:53, title:"<span class='q-arabic'>مَا تِلْكَ؟ تِلْكَ بَيْضَةٌ</span> means:", options:["What is this? This is an egg", "What is that? That is an egg", "Where is the egg?", "Whose egg is that?"], correct:1, explain:"بَيْضَةٌ means 'egg'." },
+  { page:53, title:"<span class='q-arabic'>هَذِهِ سَيَّارَةُ الْمُدَرِّسِ وَتِلْكَ سَيَّارَةُ الْمُدِيرِ</span> means:", options:["This is the teacher's car and that is the principal's car", "This is the principal's car and that is the teacher's car", "The teacher and principal share a car", "Both cars belong to the teacher"], correct:0, explain:"سَيَّارَةُ الْمُدَرِّسِ = the teacher's car; سَيَّارَةُ الْمُدِيرِ = the principal's car." },
+  { page:53, title:"<span class='q-arabic'>هَذَا جَمَلٌ وَتِلْكَ نَاقَةٌ</span> means:", options:["This is a she-camel and that is a camel", "This is a (male) camel and that is a she-camel", "Both are camels", "This is a horse and that is a camel"], correct:1, explain:"جَمَلٌ = male camel; نَاقَةٌ = she-camel." },
+
+  // ---------------- Page 54 (هذا/هذه fill-in exercise) ----------------
+  { page:54, title:"Which demonstrative correctly fits: <span class='q-arabic'>____ أُمٌّ</span> ('this is a mother')?", options:["<span class='opt-arabic'>هَذَا</span>","<span class='opt-arabic'>هَذِهِ</span>","<span class='opt-arabic'>ذَلِكَ</span>","<span class='opt-arabic'>تِلْكَ</span>"], correct:1, explain:"أُمٌّ (mother) is feminine and near, so هَذِهِ is correct." },
+  { page:54, title:"Which demonstrative correctly fits: <span class='q-arabic'>____ قَلَمٌ</span> ('this is a pen')?", options:["<span class='opt-arabic'>هَذَا</span>","<span class='opt-arabic'>هَذِهِ</span>","<span class='opt-arabic'>تِلْكَ</span>","<span class='opt-arabic'>ذَلِكَ</span>"], correct:0, explain:"قَلَمٌ (pen) is masculine and near, so هَذَا is correct." },
+  { page:54, title:"Which demonstrative correctly fits: <span class='q-arabic'>____ بَقَرَةٌ</span> ('this is a cow')?", options:["<span class='opt-arabic'>هَذَا</span>","<span class='opt-arabic'>هَذِهِ</span>","<span class='opt-arabic'>ذَلِكَ</span>","<span class='opt-arabic'>تِلْكَ</span>"], correct:1, explain:"بَقَرَةٌ (cow) is feminine and near, so هَذِهِ is correct." },
+
+  // ---------------- Page 55 (تلك points to remember, new words) ----------------
+  { page:55, title:"<span class='q-arabic'>تِلْكَ</span> is the feminine form of:", options:["هَذَا", "هَذِهِ", "ذَلِكَ", "مَنْ"], correct:2, explain:"تِلْكَ ('that', feminine) corresponds to ذَلِكَ ('that', masculine)." },
+  { page:55, title:"<span class='opt-arabic'>النَّاقَةُ</span> means:", options:["Hen", "Duck", "She-camel", "Cow"], correct:2, explain:"النَّاقَةُ means 'she-camel'." },
+  { page:55, title:"<span class='opt-arabic'>الدَّجَاجَةُ</span> means:", options:["Duck", "Hen", "Rooster", "Egg"], correct:1, explain:"الدَّجَاجَةُ means 'hen'." },
+  { page:55, title:"<span class='opt-arabic'>الْمُمَرِّضَةُ</span> means:", options:["The doctor (female)", "The nurse", "The teacher (female)", "The patient"], correct:1, explain:"الْمُمَرِّضَةُ means 'the nurse'." },
+
+  // ---------------- Page 56 (Lesson Eight – combining هذا الرجل / ذلك الرجل) ----------------
+  { page:56, title:"<span class='q-arabic'>هَذَا الرَّجُلُ تَاجِرٌ وَذَلِكَ الرَّجُلُ طَبِيبٌ</span> means:", options:["This man is a doctor and that man is a merchant", "This man is a merchant and that man is a doctor", "Both men are merchants", "Both men are doctors"], correct:1, explain:"تَاجِرٌ = merchant; طَبِيبٌ = doctor." },
+  { page:56, title:"<span class='q-arabic'>بَيْتُ التَّاجِرِ أَمَامَ الْمَسْجِدِ وَبَيْتُ الطَّبِيبِ خَلْفَ الْمَدْرَسَةِ</span> means:", options:["The merchant's house is behind the mosque and the doctor's house is in front of the school", "The merchant's house is in front of the mosque and the doctor's house is behind the school", "Both houses are near the mosque", "The doctor's house is in front of the mosque"], correct:1, explain:"أَمَامَ = in front of; خَلْفَ = behind." },
+  { page:56, title:"<span class='q-arabic'>هَذِهِ السَّيَّارَةُ لِلطَّبِيبِ وَتِلْكَ لِلتَّاجِرِ</span> means:", options:["This car belongs to the merchant and that belongs to the doctor", "This car belongs to the doctor and that belongs to the merchant", "Both cars belong to the doctor", "Neither car belongs to the doctor"], correct:1, explain:"لِلطَّبِيبِ = belongs to the doctor; لِلتَّاجِرِ = belongs to the merchant." },
+
+  // ---------------- Page 57 (read/write combined with ال + pattern conversion) ----------------
+  { page:57, title:"<span class='q-arabic'>هَذَا الْبَابُ مَفْتُوحٌ وَذَلِكَ الْبَابُ مُغْلَقٌ</span> means:", options:["This door is closed and that door is open", "This door is open and that door is closed", "Both doors are open", "Both doors are closed"], correct:1, explain:"مَفْتُوحٌ = open; مُغْلَقٌ = closed." },
+  { page:57, title:"Following the pattern in the exercise, <span class='q-arabic'>هَذَا كِتَابٌ</span> combined with اَلْ becomes:", options:["<span class='opt-arabic'>هَذَا الْكِتَابُ</span>","<span class='opt-arabic'>هَذَا كِتَابُ الْ</span>","<span class='opt-arabic'>الْكِتَابُ هَذَا</span>","<span class='opt-arabic'>هَذِهِ الْكِتَابُ</span>"], correct:0, explain:"Adding the definite article to the noun after هَذَا gives هَذَا الْكِتَابُ ('this book')." },
+  { page:57, title:"<span class='q-arabic'>هَذَا السِّكِّينُ مِنْ أَلْمَانْيَا وَتِلْكَ الْمِلْعَقَةُ مِنْ إِنْكِلْتِرَا</span> means:", options:["This knife is from England and that spoon is from Germany", "This knife is from Germany and that spoon is from England", "Both are from Germany", "Both are from England"], correct:1, explain:"أَلْمَانْيَا = Germany; إِنْكِلْتِرَا = England." },
+
+  // ---------------- Page 58 (pattern exercise: لمن هذا الكتاب؟) ----------------
+  { page:58, title:"In the example <span class='q-arabic'>لِمَنْ هَذَا الْكِتَابُ؟ هَذَا الْكِتَابُ لِمُحَمَّدٍ</span>, what is being asked?", options:["What is this book about?", "Whose book is this?", "Where is the book?", "Is this a book?"], correct:1, explain:"لِمَنْ هَذَا الْكِتَابُ؟ asks 'Whose book is this?'" },
+  { page:58, title:"If the answer word given is <span class='opt-arabic'>(عَبَّاسٍ)</span>, following the pattern the correct answer sentence would be:", options:["<span class='opt-arabic'>هَذَا الْكِتَابُ عَبَّاسٌ</span>","<span class='opt-arabic'>هَذَا الْكِتَابُ لِعَبَّاسٍ</span>","<span class='opt-arabic'>عَبَّاسٌ هَذَا الْكِتَابُ</span>","<span class='opt-arabic'>هَذَا كِتَابُ لِعَبَّاسٍ</span>"], correct:1, explain:"Following the pattern, لِ + the possessor's name (genitive) gives هَذَا الْكِتَابُ لِعَبَّاسٍ." },
+
+  // ---------------- Page 59 (prepositions with proper nouns table) ----------------
+  { page:59, title:"Looking at the preposition table, <span class='q-arabic'>فِي أَمْرِيكَا</span> means:", options:["From America", "In America", "To America", "About America"], correct:1, explain:"فِي أَمْرِيكَا means 'in America'." },
+  { page:59, title:"<span class='q-arabic'>مِنْ أَمْرِيكَا</span> means:", options:["To America", "In America", "From America", "Near America"], correct:2, explain:"مِنْ أَمْرِيكَا means 'from America'." },
+  { page:59, title:"<span class='q-arabic'>ذَهَبَ حَامِدٌ إِلَى فَرَنْسَا</span> means:", options:["Hamid is from France", "Hamid went to France", "Hamid is in France", "Hamid likes France"], correct:1, explain:"ذَهَبَ إِلَى means 'went to'." },
+  { page:59, title:"<span class='q-arabic'>مَحْمُودٌ مَرِيضٌ. هُوَ الْآنَ فِي الْمُسْتَشْفَى</span> means:", options:["Mahmoud is a doctor. He works at the hospital", "Mahmoud is sick. He is now in the hospital", "Mahmoud visited the hospital", "Mahmoud left the hospital"], correct:1, explain:"الْمُسْتَشْفَى means 'the hospital'." },
+
+  // ---------------- Page 60 (in front of/behind sentences, points to remember) ----------------
+  { page:60, title:"<span class='q-arabic'>أَيْنَ بَيْتُ الْإِمَامِ؟ بَيْتُ الْإِمَامِ خَلْفَ الْمَسْجِدِ</span> means:", options:["Where is the imam's house? It is in front of the mosque", "Where is the imam's house? It is behind the mosque", "Where is the mosque? Behind the imam's house", "The imam lives in the mosque"], correct:1, explain:"خَلْفَ الْمَسْجِدِ means 'behind the mosque'." },
+  { page:60, title:"To make <span class='q-arabic'>هَذَا الْكِتَابُ</span> ('this book') into a complete sentence, what must be added?", options:["A preposition", "A predicate, e.g. جَدِيدٌ ('new')", "The definite article", "A vocative particle"], correct:1, explain:"هَذَا الْكِتَابُ جَدِيدٌ ('this book is new') completes the sentence with a predicate." },
+  { page:60, title:"Words like <span class='opt-arabic'>أَمَامَ</span> (in front of), <span class='opt-arabic'>خَلْفَ</span> (behind), and <span class='opt-arabic'>تَحْتَ</span> (under) are examples of:", options:["Prepositions only", "Adverbs of place (ظَرْفٌ)", "Adjectives", "Vocative particles"], correct:1, explain:"These location words function as ظَرْفٌ (adverbs of place), each followed by a mudaf ilaihi in the genitive." },
+
+  // ---------------- Page 61 (long alif nouns, خلف/أمام, جلس) ----------------
+  { page:61, title:"Nouns ending in a long <b>\"â\"</b> sound (like أَمْرِيكَا) have endings that:", options:["Change with the normal -u/-i pattern", "Remain unchanged (no case ending)", "Always take tanwin", "Are dropped entirely"], correct:1, explain:"Nouns ending in long â, such as أَمْرِيكَا, have no case endings and remain unchanged." },
+  { page:61, title:"<span class='opt-arabic'>خَلْفَ</span> means:", options:["In front of", "Behind", "Under", "Above"], correct:1, explain:"خَلْفَ means 'behind'." },
+  { page:61, title:"<span class='opt-arabic'>أَمَامَ</span> means:", options:["Behind", "In front of", "Under", "Beside"], correct:1, explain:"أَمَامَ means 'in front of'." },
+  { page:61, title:"<span class='opt-arabic'>جَلَسَ</span> means:", options:["He stood", "He sat", "He went", "He left"], correct:1, explain:"جَلَسَ means 'he sat'." },
+
+  // ---------------- Page 62 (Lesson Nine – هو/هي/هم, intro sentences) ----------------
+  { page:62, title:"<span class='opt-arabic'>هُمْ</span> means:", options:["He", "She", "They", "You"], correct:2, explain:"هُمْ means 'they'." },
+  { page:62, title:"<span class='q-arabic'>مَنْ هَذَا الرَّجُلُ؟ هُوَ عَبَّاسٌ</span> means:", options:["Who is this man? He is 'Abbas", "Who is that man? He is a merchant", "What is this? It belongs to 'Abbas", "Where is 'Abbas?"], correct:0, explain:"هُوَ عَبَّاسٌ means 'He is 'Abbas'." },
+  { page:62, title:"<span class='q-arabic'>عَبَّاسٌ تَاجِرٌ غَنِيٌّ</span> means:", options:["'Abbas is a poor merchant", "'Abbas is a rich merchant", "'Abbas is a famous doctor", "'Abbas is a new student"], correct:1, explain:"غَنِيٌّ means 'rich', describing the merchant 'Abbas." },
+  { page:62, title:"<span class='q-arabic'>الْعَرَبِيَّةُ لُغَةٌ سَهْلَةٌ</span> means:", options:["Arabic is a difficult language", "Arabic is an easy language", "Arabic is a beautiful language", "English is an easy language"], correct:1, explain:"سَهْلَةٌ means 'easy'." },
+
+  // ---------------- Page 63 (exercises – مجتهد/كسلان) ----------------
+  { page:63, title:"<span class='q-arabic'>عَمَّارٌ طَالِبٌ مُجْتَهِدٌ، وَمَحْمُودٌ طَالِبٌ كَسْلَانُ</span> means:", options:["'Ammar is a lazy student and Mahmoud is hardworking", "'Ammar is a hardworking student and Mahmoud is a lazy student", "Both students are hardworking", "Both students are lazy"], correct:1, explain:"مُجْتَهِدٌ = hardworking; كَسْلَانُ = lazy." },
+  { page:63, title:"<span class='q-arabic'>أَأَنْتَ طَالِبٌ جَدِيدٌ؟ نَعَمْ، أَنَا طَالِبٌ جَدِيدٌ</span> means:", options:["Are you an old student? Yes", "Are you a new student? Yes, I am a new student", "Is he a new student?", "Are you a teacher?"], correct:1, explain:"طَالِبٌ جَدِيدٌ means 'a new student'." },
+  { page:63, title:"<span class='q-arabic'>الْقَاهِرَةُ مَدِينَةٌ كَبِيرَةٌ</span> means:", options:["Cairo is a small city", "Cairo is a big city", "Cairo is a beautiful city", "Kuwait is a big city"], correct:1, explain:"مَدِينَةٌ كَبِيرَةٌ means 'a big city'." },
+
+  // ---------------- Page 64 (fill blanks with adjective – نعت, feelings) ----------------
+  { page:64, title:"<span class='q-arabic'>أَنَا جَوْعَانُ</span> means:", options:["I am thirsty", "I am hungry", "I am tired", "I am angry"], correct:1, explain:"جَوْعَانُ means 'hungry'." },
+  { page:64, title:"<span class='q-arabic'>لِمَاذَا الْمُدَرِّسُ غَضْبَانُ الْيَوْمَ؟</span> means:", options:["When is the teacher coming today?", "Why is the teacher angry today?", "Where is the teacher today?", "Is the teacher here today?"], correct:1, explain:"غَضْبَانُ means 'angry'; لِمَاذَا means 'why'." },
+  { page:64, title:"<span class='q-arabic'>الْكُوبُ مَلْآنُ</span> means:", options:["The cup is empty", "The cup is full", "The cup is broken", "The cup is clean"], correct:1, explain:"مَلْآنُ means 'full'." },
+
+  // ---------------- Page 65 (new words + exercise B) ----------------
+  { page:65, title:"<span class='opt-arabic'>شَهِيرٌ</span> means:", options:["New", "Famous", "Old", "Rich"], correct:1, explain:"شَهِيرٌ means 'famous'." },
+  { page:65, title:"<span class='opt-arabic'>الْيَوْمَ</span> means:", options:["Yesterday", "Tomorrow", "Today", "Now"], correct:2, explain:"الْيَوْمَ means 'today'." },
+  { page:65, title:"<span class='q-arabic'>أَيْنَ الْمُدَرِّسُ الْجَدِيدُ؟ هُوَ عِنْدَ الْمُدِيرِ</span> means:", options:["Where is the new teacher? He is in the classroom", "Where is the new teacher? He is with the principal", "Who is the new teacher?", "The new teacher is absent today"], correct:1, explain:"عِنْدَ الْمُدِيرِ means 'with the principal'." },
+  { page:65, title:"<span class='q-arabic'>مَنْ ذَلِكَ الرَّجُلُ الطَّوِيلُ الَّذِي خَرَجَ الْآنَ مِنَ الْمَدْرَسَةِ؟ هُوَ الْمُدِيرُ الْجَدِيدُ</span> means:", options:["Who is that short man in the school? He is a teacher", "Who is that tall man who just left the school? He is the new principal", "Who is the new student?", "Where did the tall man go?"], correct:1, explain:"الَّذِي خَرَجَ الْآنَ means 'who just left'." },
+
+  // ---------------- Page 66 (exercise read/write) ----------------
+  { page:66, title:"<span class='opt-arabic'>الْمِرْوَحَةُ</span> means:", options:["The fan", "The lamp", "The clock", "The window"], correct:0, explain:"الْمِرْوَحَةُ means 'the fan'." },
+  { page:66, title:"<span class='q-arabic'>الطَّبِيبُ الْجَدِيدُ فِي الْمُسْتَشْفَى وَالطَّبِيبُ الْقَدِيمُ فِي الْمُسْتَوْصَفِ</span> means:", options:["The new doctor is in the clinic and the old doctor is in the hospital", "The new doctor is in the hospital and the old doctor is in the clinic", "Both doctors are in the hospital", "Both doctors are in the clinic"], correct:1, explain:"الْمُسْتَشْفَى = hospital; الْمُسْتَوْصَفِ = clinic/dispensary." },
+  { page:66, title:"<span class='q-arabic'>السِّكِّينُ الْكَبِيرُ حَادٌّ جِدًّا</span> means:", options:["The small knife is very sharp", "The big knife is very sharp", "The big knife is dull", "The big knife is new"], correct:1, explain:"حَادٌّ means 'sharp'; جِدًّا means 'very'." },
+
+  // ---------------- Page 67 (fill blank with adjective + اَلْ if necessary) ----------------
+  { page:67, title:"In this exercise, when must اَلْ be added to the bracketed adjective before inserting it?", options:["Always, regardless of context", "When the noun (منعوت) it describes is definite", "Never — adjectives never take اَلْ", "Only for feminine nouns"], correct:1, explain:"The adjective must match the definiteness of the noun it describes." },
+  { page:67, title:"Complete: <span class='q-arabic'>التَّاجِرُ ____ (كَبِيرٌ) فِي السُّوقِ</span>", options:["<span class='opt-arabic'>كَبِيرٌ</span>","<span class='opt-arabic'>الْكَبِيرُ</span>","<span class='opt-arabic'>كَبِيرَةٌ</span>","<span class='opt-arabic'>الْكَبِيرَةُ</span>"], correct:1, explain:"Since التَّاجِرُ is definite, the adjective must also be definite: الْكَبِيرُ." },
+  { page:67, title:"Complete: <span class='q-arabic'>أَنَا طَالِبٌ ____ (قَدِيمٌ)</span>", options:["<span class='opt-arabic'>الْقَدِيمُ</span>","<span class='opt-arabic'>قَدِيمٌ</span>","<span class='opt-arabic'>قَدِيمَةٌ</span>","<span class='opt-arabic'>الْقَدِيمَةُ</span>"], correct:1, explain:"طَالِبٌ is indefinite, so the adjective stays indefinite: قَدِيمٌ." },
+
+  // ---------------- Page 68 (relative pronoun الذي exercise) ----------------
+  { page:68, title:"The relative pronoun <span class='opt-arabic'>الَّذِي</span> is translated as \"who\" when it refers to:", options:["An animal", "A thing", "A human being", "A place"], correct:2, explain:"الَّذِي = 'who' for people, and 'which' for animals or things." },
+  { page:68, title:"The relative pronoun <span class='opt-arabic'>الَّذِي</span> is translated as \"which\" when it refers to:", options:["A human being only", "An animal or a thing", "A place only", "A time"], correct:1, explain:"For animals or things, الَّذِي is translated as 'which'." },
+  { page:68, title:"<span class='q-arabic'>الْكِتَابُ الَّذِي عَلَى الْمَكْتَبِ لِلْمُدَرِّسِ</span> means:", options:["The book that is under the desk belongs to the student", "The book which is on the desk belongs to the teacher", "The desk with the book belongs to the teacher", "The teacher's desk has a book"], correct:1, explain:"الَّذِي عَلَى الْمَكْتَبِ means 'which is on the desk'." },
+
+  // ---------------- Page 69 (Points to Remember Part A – adjective agreement) ----------------
+  { page:69, title:"In Arabic, unlike English, the adjective (نَعْتٌ) comes:", options:["Before the noun it qualifies", "After the noun it qualifies", "At the end of the sentence only", "At the beginning of the sentence"], correct:1, explain:"Arabic places the adjective after the noun, e.g. بَيْتٌ جَدِيدٌ ('a new house')." },
+  { page:69, title:"The noun that an adjective qualifies is called:", options:["نَعْتٌ", "مَنْعُوتٌ", "مُضَافٌ", "مُبْتَدَأٌ"], correct:1, explain:"The qualified noun is called مَنْعُوتٌ; the adjective itself is نَعْتٌ." },
+  { page:69, title:"An adjective must agree with its noun in gender, definiteness, and:", options:["Number of letters", "Case", "Length", "Root"], correct:1, explain:"The adjective matches the noun in gender, definiteness, AND case." },
+  { page:69, title:"<span class='q-arabic'>بَيْتٌ جَدِيدٌ</span> means:", options:["The new house", "A new house", "This is a new house", "The house is new"], correct:1, explain:"Without a definite article, بَيْتٌ جَدِيدٌ means 'a new house' (just a phrase, not a full sentence)." },
+
+  // ---------------- Page 70 (adjectives ending in -ân, vocab, Part B intro) ----------------
+  { page:70, title:"Adjectives ending in <b>\"-ân\"</b> (like كَسْلَانُ, جَوْعَانُ) take:", options:["Double tanwin", "No tanwin", "Only kasra tanwin", "A shaddah"], correct:1, explain:"These adjectives (kaslânu, jau'ânu, etc.) have no tanwin ending." },
+  { page:70, title:"<span class='opt-arabic'>عَطْشَانُ</span> means:", options:["Hungry", "Thirsty", "Tired", "Full"], correct:1, explain:"عَطْشَانُ means 'thirsty'." },
+  { page:70, title:"<span class='opt-arabic'>غَضْبَانُ</span> means:", options:["Happy", "Angry", "Sad", "Sleepy"], correct:1, explain:"غَضْبَانُ means 'angry'." },
+  { page:70, title:"<span class='q-arabic'>الرَّجُلُ الَّذِي خَرَجَ مِنَ الْمَسْجِدِ الْآنَ تَاجِرٌ شَهِيرٌ</span> means:", options:["The man who is entering the mosque is a merchant", "The man who just left the mosque is a famous merchant", "The famous merchant is inside the mosque", "The mosque belongs to a famous merchant"], correct:1, explain:"الَّذِي خَرَجَ الْآنَ means 'who just left'; شَهِيرٌ means 'famous'." },
+
+  // ---------------- Page 71 (لِ + noun with اَلْ, عند) ----------------
+  { page:71, title:"When لِ is used with a noun that has اَلْ, what happens to the alif of اَلْ?", options:["It stays and is pronounced", "It is omitted", "It becomes a hamza", "It doubles"], correct:1, explain:"E.g. الْإِمَامُ + لِ becomes لِلْإِمَامِ, dropping the alif." },
+  { page:71, title:"<span class='opt-arabic'>الْإِمَامُ</span> combined with لِ (belonging to) becomes:", options:["<span class='opt-arabic'>لِالْإِمَامِ</span>","<span class='opt-arabic'>لِلْإِمَامِ</span>","<span class='opt-arabic'>الْإِمَامُ لِ</span>","<span class='opt-arabic'>لِإِمَامٍ</span>"], correct:1, explain:"لِلْإِمَامِ ('belonging to the imam') drops the alif of اَلْ." },
+  { page:71, title:"<span class='opt-arabic'>عِنْدَ</span> means:", options:["Under", "With / at the place of", "Behind", "In front of"], correct:1, explain:"عِنْدَ means 'with' in the sense of 'at someone's place'." },
+  { page:71, title:"<span class='q-arabic'>الْمُدَرِّسُ عِنْدَ الْمُدِيرِ</span> means:", options:["The teacher is the principal", "The teacher is with the headmaster", "The teacher likes the headmaster", "The principal is a teacher"], correct:1, explain:"عِنْدَ الْمُدِيرِ means 'with the headmaster' (at his office)." },
+
+  // ---------------- Page 72 (Lesson Ten dialogue – intro) ----------------
+  { page:72, title:"<span class='q-arabic'>أَنَا طَالِبٌ بِالْجَامِعَةِ</span> means:", options:["I am a teacher at the university", "I am a student at the university", "I am going to university", "I graduated from university"], correct:1, explain:"طَالِبٌ بِالْجَامِعَةِ means 'a student at the university'." },
+  { page:72, title:"<span class='q-arabic'>مِنْ أَيْنَ أَنْتَ؟ أَنَا مِنَ الْهِنْدِ</span> means:", options:["Where are you going? To India", "Where are you from? I am from India", "Do you like India?", "Have you been to India?"], correct:1, explain:"مِنْ أَيْنَ أَنْتَ؟ means 'Where are you from?'" },
+  { page:72, title:"<span class='q-arabic'>مَا اسْمُكَ؟ اسْمِي مُحَمَّدٌ</span> means:", options:["How are you? I am fine", "What is your name? My name is Muhammad", "Who are you?", "Where do you live?"], correct:1, explain:"مَا اسْمُكَ؟ means 'What is your name?'" },
+  { page:72, title:"<span class='q-arabic'>وَمَنْ هَذَا الْفَتَى الَّذِي مَعَكَ؟ هُوَ زَمِيلِي</span> means:", options:["And who is this young man with you? He is my brother", "And who is this young man with you? He is my classmate", "Who is this old man?", "Is this your friend's brother?"], correct:1, explain:"زَمِيلِي means 'my classmate/colleague'." },
+
+  // ---------------- Page 73 (dialogue continued – family) ----------------
+  { page:73, title:"<span class='q-arabic'>أَيْنَ أَبُوكَ يَا مُحَمَّدُ؟ أَبِي فِي الْكُوَيْتِ. هُوَ طَبِيبٌ شَهِيرٌ</span> means:", options:["Where is your brother, Muhammad? He is in Kuwait, a teacher", "Where is your father, Muhammad? My father is in Kuwait. He is a famous doctor", "Where is Muhammad's uncle?", "Muhammad's father is a merchant in Kuwait"], correct:1, explain:"أَبِي means 'my father'; طَبِيبٌ شَهِيرٌ means 'a famous doctor'." },
+  { page:73, title:"<span class='q-arabic'>لِي أَخٌ وَاحِدٌ اسْمُهُ أُسَامَةُ</span> means:", options:["I have two brothers", "I have one brother named Usama", "My brother's name is unknown", "I have a sister named Usama"], correct:1, explain:"لِي أَخٌ وَاحِدٌ means 'I have one brother'." },
+  { page:73, title:"<span class='q-arabic'>أَعِنْدَكَ سَيَّارَةٌ يَا أَخِي؟ لَا، مَا عِنْدِي سَيَّارَةٌ</span> means:", options:["Do you have a car, my brother? Yes, I do", "Do you have a car, my brother? No, I don't have a car", "Do you want to buy a car?", "Where is your car, brother?"], correct:1, explain:"مَا عِنْدِي سَيَّارَةٌ means 'I don't have a car' (negative مَا)." },
+
+  // ---------------- Page 74 (exercise questions) ----------------
+  { page:74, title:"<span class='q-arabic'>مَا اسْمُكَ؟</span> means:", options:["Where are you from?", "What is your name?", "How old are you?", "Who are you?"], correct:1, explain:"مَا اسْمُكَ؟ = 'What is your name?'" },
+  { page:74, title:"<span class='q-arabic'>أَلَكَ أَخٌ؟</span> means:", options:["Do you have a sister?", "Do you have a brother?", "Is this your brother?", "Where is your brother?"], correct:1, explain:"أَلَكَ أَخٌ؟ = 'Do you have a brother?' (literally 'is there a brother belonging to you?')." },
+  { page:74, title:"<span class='q-arabic'>أَعِنْدَكَ دَرَّاجَةٌ؟</span> means:", options:["Do you have a car?", "Do you have a bicycle?", "Is this your bicycle?", "Where is the bicycle?"], correct:1, explain:"أَعِنْدَكَ دَرَّاجَةٌ؟ = 'Do you have a bicycle?'" },
+
+  // ---------------- Page 75 (fill blank with pronoun ه/ها, possessive suffixes intro) ----------------
+  { page:75, title:"The suffix <span class='opt-arabic'>هُ</span> attached to a noun means:", options:["Her", "His", "Their", "Your"], correct:1, explain:"هُ as a possessive suffix means 'his', e.g. كِتَابُهُ ('his book')." },
+  { page:75, title:"The suffix <span class='opt-arabic'>هَا</span> attached to a noun means:", options:["His", "Her", "My", "Your"], correct:1, explain:"هَا as a possessive suffix means 'her', e.g. بَيْتُهَا ('her house')." },
+  { page:75, title:"<span class='opt-arabic'>بَيْتٌ</span> + ي (my) becomes:", options:["<span class='opt-arabic'>بَيْتُي</span>","<span class='opt-arabic'>بَيْتِي</span>","<span class='opt-arabic'>بَيْتٌي</span>","<span class='opt-arabic'>بَيْتَي</span>"], correct:1, explain:"Adding the 'my' suffix gives بَيْتِي ('my house')." },
+
+  // ---------------- Page 76 (possessive suffix table continued, لي/لك/له/لها) ----------------
+  { page:76, title:"<span class='opt-arabic'>لِي</span> means:", options:["Belongs to you", "Belongs to me / I have", "Belongs to him", "Belongs to her"], correct:1, explain:"لِي means 'belongs to me' or 'I have', taking a kasrah rather than fathah." },
+  { page:76, title:"<span class='q-arabic'>لِي أُخْتٌ وَاحِدَةٌ</span> means:", options:["I have one brother", "I have one sister", "I have two sisters", "My sister has one brother"], correct:1, explain:"أُخْتٌ وَاحِدَةٌ means 'one sister'." },
+  { page:76, title:"<span class='q-arabic'>أَلَكَ أَخٌ؟ لَا، مَا لِي أَخٌ</span> means:", options:["Do you have a brother? Yes, I do", "Do you have a brother? No, I don't have a brother", "Is this your brother?", "Where is your brother?"], correct:1, explain:"مَا لِي أَخٌ means 'I don't have a brother'." },
+
+  // ---------------- Page 77 (exercise مع, أب/أخ possessive table) ----------------
+  { page:77, title:"<span class='q-arabic'>خَرَجَ أَبِي مِنَ الْبَيْتِ. مَنْ خَرَجَ مَعَهُ؟ خَرَجَ مَعَهُ عَمِّي</span> means:", options:["My father stayed home. My uncle visited", "My father left the house. Who left with him? My uncle left with him", "My uncle left the house alone", "My father and I left together"], correct:1, explain:"مَعَهُ means 'with him'; عَمِّي means 'my uncle'." },
+  { page:77, title:"In the possessive table, \"your father\" (masculine singular 'you') is:", options:["<span class='opt-arabic'>أَبِي</span>","<span class='opt-arabic'>أَبُوكَ</span>","<span class='opt-arabic'>أَبُوهُ</span>","<span class='opt-arabic'>أَبُوهَا</span>"], correct:1, explain:"أَبُوكَ means 'your father', using the extra waw before the suffix." },
+  { page:77, title:"\"His brother\" is correctly written as:", options:["<span class='opt-arabic'>أَخُوكَ</span>","<span class='opt-arabic'>أَخُوهُ</span>","<span class='opt-arabic'>أَخِي</span>","<span class='opt-arabic'>أَخُوهَا</span>"], correct:1, explain:"أَخُوهُ means 'his brother', with the extra waw inserted before the suffix هُ." },
+
+  // ---------------- Page 78 (Points to Remember – possessive pronouns ك ه ها ي) ----------------
+  { page:78, title:"<span class='opt-arabic'>كِتَابُكَ</span> means:", options:["My book", "Your book", "His book", "Her book"], correct:1, explain:"كِتَابُكَ means 'your book' (masculine singular)." },
+  { page:78, title:"<span class='opt-arabic'>كِتَابُهُ</span> means:", options:["Your book", "His book", "Her book", "My book"], correct:1, explain:"كِتَابُهُ means 'his book'." },
+  { page:78, title:"<span class='opt-arabic'>كِتَابِي</span> means:", options:["Your book", "His book", "My book", "Her book"], correct:2, explain:"كِتَابِي means 'my book'." },
+  { page:78, title:"The possessive pronoun suffixes ك، هُ، هَا، ي are:", options:["Full independent words", "Attached like suffixes to nouns", "Only used with verbs", "Never used with singular nouns"], correct:1, explain:"These pronouns are not full-fledged words — they attach directly to the noun, like suffixes." },
+
+  // ---------------- Page 79 (extra waw with أب/أخ, عند = to have, لِ + pronouns, ذهب/ذهبت) ----------------
+  { page:79, title:"\"Your brother\" is correctly written as:", options:["<span class='opt-arabic'>أَخْكَ</span>","<span class='opt-arabic'>أَخُوكَ</span>","<span class='opt-arabic'>أَخِيكَ</span>","<span class='opt-arabic'>أَخُهُكَ</span>"], correct:1, explain:"An extra waw is inserted for أَبٌ and أَخٌ when they are mudaf: أَخُوكَ, not أَخْكَ." },
+  { page:79, title:"<span class='q-arabic'>أَعِنْدَكَ قَلَمٌ؟</span> literally means:", options:["Do you like pens?", "Is there a pen with you? (Have you a pen?)", "Where is your pen?", "Is this pen yours?"], correct:1, explain:"عِنْدَ is used to express 'to have', literally 'with you'." },
+  { page:79, title:"<span class='opt-arabic'>ذَهَبْتَ</span> means:", options:["He went", "I went", "You went (masculine singular)", "They went"], correct:2, explain:"ذَهَبْتَ means 'you went' (masculine singular)." },
+  { page:79, title:"<span class='opt-arabic'>ذَهَبْتُ</span> means:", options:["You went", "He went", "I went (masculine or feminine)", "She went"], correct:2, explain:"ذَهَبْتُ means 'I went', used for both masculine and feminine speakers." },
+
+  // ---------------- Page 80 (feminine proper nouns no tanwin, مع vs عند, بـ preposition, ما negative) ----------------
+  { page:80, title:"Masculine proper nouns ending in ة (like حَمْزَةُ) also have:", options:["Double tanwin", "No tanwin", "Only kasra tanwin", "A shaddah"], correct:1, explain:"Like feminine proper nouns, masculine names ending in ة also take no tanwin." },
+  { page:80, title:"What is the key difference between عِنْدَ and مَعَ, both roughly meaning \"with\"?", options:["They are exactly the same", "عِنْدَ implies being at someone's specific place; مَعَ has no such restriction", "مَعَ is only used for objects", "عِنْدَ is only used with animals"], correct:1, explain:"الْمُدَرِّسُ عِنْدَ الْمُدِيرِ implies the teacher went to the principal's office, while مَعَ الْمُدِيرِ has no such restriction — he could be with the principal anywhere." },
+  { page:80, title:"The preposition <span class='opt-arabic'>بِـ</span> means:", options:["From / to", "At / in", "Under / behind", "Before / after"], correct:1, explain:"بِـ means 'at' or 'in', as in بِالْجَامِعَةِ ('at the university')." },
+  { page:80, title:"<span class='q-arabic'>مَا عِنْدِي سَيَّارَةٌ</span> means:", options:["I have a car", "I don't have a car", "Do I have a car?", "My car is here"], correct:1, explain:"مَا here functions as a negative particle: 'I don't have a car.'" },
+];
+
+const MIN_PAGE = 3;
+const MAX_PAGE = 80;
+
+/* ===================================================================
+   SETUP LOGIC
+   =================================================================== */
+const fromPageInput = document.getElementById('fromPage');
+const toPageInput = document.getElementById('toPage');
+const numQInput = document.getElementById('numQuestions');
+const pageAvailDiv = document.getElementById('pageAvail');
+const availNoteDiv = document.getElementById('availNote');
+const setupErrorDiv = document.getElementById('setupError');
+
+function poolForRange(from, to){
+  return BANK.filter(q => q.page >= from && q.page <= to);
+}
+
+function updateAvailability(){
+  let from = parseInt(fromPageInput.value);
+  let to = parseInt(toPageInput.value);
+  setupErrorDiv.style.display = 'none';
+
+  if (isNaN(from) || isNaN(to)) { pageAvailDiv.textContent = ''; return; }
+  if (from > to) { pageAvailDiv.textContent = ''; return; }
+
+  const pool = poolForRange(from, to);
+  pageAvailDiv.textContent = `${pool.length} question${pool.length===1?'':'s'} available for pages ${from}–${to}.`;
+}
+
+fromPageInput.addEventListener('input', updateAvailability);
+toPageInput.addEventListener('input', updateAvailability);
+updateAvailability();
+
+let currentQuestions = [];
+let finalizedQuiz = []; // exact shuffled quiz (questions + option order) used for export
+
+document.getElementById('generateBtn').addEventListener('click', () => {
+  let from = parseInt(fromPageInput.value);
+  let to = parseInt(toPageInput.value);
+  let n = parseInt(numQInput.value);
+
+  setupErrorDiv.style.display = 'none';
+  availNoteDiv.style.display = 'none';
+
+  if (isNaN(from) || isNaN(to) || isNaN(n)) {
+    setupErrorDiv.textContent = 'Please fill in all fields.';
+    setupErrorDiv.style.display = 'block';
+    return;
+  }
+  from = Math.max(MIN_PAGE, Math.min(from, MAX_PAGE));
+  to = Math.max(MIN_PAGE, Math.min(to, MAX_PAGE));
+  if (from > to) {
+    setupErrorDiv.textContent = `"From page" must be less than or equal to "To page".`;
+    setupErrorDiv.style.display = 'block';
+    return;
+  }
+  if (n < 1) {
+    setupErrorDiv.textContent = 'Number of questions must be at least 1.';
+    setupErrorDiv.style.display = 'block';
+    return;
+  }
+
+  const pool = poolForRange(from, to);
+  if (pool.length === 0) {
+    setupErrorDiv.textContent = `No questions found for pages ${from}–${to}. Try a wider range.`;
+    setupErrorDiv.style.display = 'block';
+    return;
+  }
+
+  // shuffle pool (Fisher-Yates)
+  const shuffled = [...pool];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  let actualN = Math.min(n, shuffled.length);
+  if (n > shuffled.length) {
+    availNoteDiv.textContent = `Only ${shuffled.length} question(s) available in this range — generating all of them.`;
+    availNoteDiv.style.display = 'block';
+  }
+
+  currentQuestions = shuffled.slice(0, actualN);
+  buildQuiz(from, to);
+});
+
+/* ===================================================================
+   QUIZ BUILD & GRADE LOGIC
+   =================================================================== */
+const setupPanel = document.getElementById('setupPanel');
+const quizPanel = document.getElementById('quizPanel');
+const quizForm = document.getElementById('quizForm');
+const rangeLabel = document.getElementById('rangeLabel');
+const scorePanel = document.getElementById('scorePanel');
+const unansweredWarning = document.getElementById('unansweredWarning');
+
+function buildQuiz(from, to){
+  quizForm.innerHTML = '';
+  scorePanel.style.display = 'none';
+  unansweredWarning.style.display = 'none';
+  finalizedQuiz = [];
+
+  currentQuestions.forEach((q, i) => {
+    // shuffle options, remember correct text
+    const correctText = q.options[q.correct];
+    const optIndexes = q.options.map((_, idx) => idx);
+    for (let a = optIndexes.length - 1; a > 0; a--) {
+      const b = Math.floor(Math.random() * (a + 1));
+      [optIndexes[a], optIndexes[b]] = [optIndexes[b], optIndexes[a]];
+    }
+    const shuffledOptions = optIndexes.map(idx => q.options[idx]);
+    const newCorrectIndex = shuffledOptions.indexOf(correctText);
+
+    finalizedQuiz.push({
+      page: q.page,
+      title: q.title,
+      options: shuffledOptions,
+      correct: newCorrectIndex,
+      explain: q.explain
+    });
+
+    const qDiv = document.createElement('div');
+    qDiv.className = 'question';
+    qDiv.id = 'q' + i;
+    qDiv.dataset.correct = newCorrectIndex;
+    qDiv.dataset.explain = q.explain;
+
+    const tag = document.createElement('div');
+    tag.className = 'q-tag';
+    tag.textContent = 'Page ' + q.page;
+    qDiv.appendChild(tag);
+
+    const title = document.createElement('div');
+    title.className = 'q-title';
+    title.innerHTML = (i+1) + '. ' + q.title;
+    qDiv.appendChild(title);
+
+    const optsDiv = document.createElement('div');
+    optsDiv.className = 'options';
+
+    shuffledOptions.forEach((opt, j) => {
+      const label = document.createElement('label');
+      label.className = 'option';
+      label.id = 'q' + i + 'opt' + j;
+      label.innerHTML = `
+        <input type="radio" name="q${i}" value="${j}">
+        <span class="opt-text">${opt}</span>
+        <span class="feedback-icon" id="icon${i}_${j}"></span>
+      `;
+      optsDiv.appendChild(label);
+    });
+
+    qDiv.appendChild(optsDiv);
+
+    const explain = document.createElement('div');
+    explain.className = 'explain';
+    explain.textContent = 'Explanation: ' + q.explain;
+    qDiv.appendChild(explain);
+
+    quizForm.appendChild(qDiv);
+  });
+
+  rangeLabel.textContent = `Pages ${from}–${to} · ${currentQuestions.length} question${currentQuestions.length===1?'':'s'}`;
+  setupPanel.style.display = 'none';
+  quizPanel.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('submitBtn').addEventListener('click', () => {
+  let answeredCount = 0;
+  let score = 0;
+  const total = currentQuestions.length;
+
+  currentQuestions.forEach((q, i) => {
+    const qDiv = document.getElementById('q' + i);
+    const correctIdx = parseInt(qDiv.dataset.correct);
+    const selected = quizForm.querySelector(`input[name="q${i}"]:checked`);
+    qDiv.classList.add('checked');
+
+    const numOpts = qDiv.querySelectorAll('.option').length;
+
+    if (selected) {
+      answeredCount++;
+      const chosen = parseInt(selected.value);
+      const isCorrect = chosen === correctIdx;
+      if (isCorrect) score++;
+
+      qDiv.classList.remove('correct', 'incorrect');
+      qDiv.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+      for (let j = 0; j < numOpts; j++) {
+        const icon = document.getElementById(`icon${i}_${j}`);
+        icon.textContent = '';
+        icon.className = 'feedback-icon';
+        if (j === correctIdx) {
+          icon.textContent = '✓';
+          icon.classList.add('right');
+        } else if (j === chosen && chosen !== correctIdx) {
+          icon.textContent = '✗';
+          icon.classList.add('wrong');
+        }
+      }
+    } else {
+      qDiv.classList.remove('correct', 'incorrect');
+      for (let j = 0; j < numOpts; j++) {
+        const icon = document.getElementById(`icon${i}_${j}`);
+        icon.textContent = j === correctIdx ? '✓' : '';
+        icon.className = 'feedback-icon' + (j === correctIdx ? ' right' : '');
+      }
+    }
+  });
+
+  unansweredWarning.style.display = (answeredCount < total) ? 'block' : 'none';
+
+  scorePanel.style.display = 'block';
+  document.getElementById('scoreNum').textContent = `${score} / ${total}`;
+
+  const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+  let msg = '';
+  if (pct === 100) msg = 'مُمْتَازٌ! Perfect score!';
+  else if (pct >= 80) msg = 'أَحْسَنْتَ! Great job!';
+  else if (pct >= 60) msg = 'جَيِّدٌ. Good, but review a bit more.';
+  else msg = 'رَاجِعِ الدَّرْسَ. Please review the lessons and try again.';
+
+  const name = document.getElementById('studentName').value;
+  document.getElementById('scoreMsg').textContent = (name ? name + ' — ' : '') + msg + ` (${pct}%)`;
+
+  document.getElementById('printBtn').style.display = 'inline-block';
+
+  scorePanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+document.getElementById('printBtn').addEventListener('click', () => {
+  window.print();
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  quizForm.reset();
+  currentQuestions.forEach((q, i) => {
+    const qDiv = document.getElementById('q' + i);
+    qDiv.classList.remove('correct', 'incorrect', 'checked');
+    const numOpts = qDiv.querySelectorAll('.option').length;
+    for (let j = 0; j < numOpts; j++) {
+      const icon = document.getElementById(`icon${i}_${j}`);
+      icon.textContent = '';
+      icon.className = 'feedback-icon';
+    }
+  });
+  scorePanel.style.display = 'none';
+  document.getElementById('printBtn').style.display = 'none';
+  unansweredWarning.style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+document.getElementById('newTestBtn').addEventListener('click', () => {
+  document.getElementById('generateBtn').click();
+});
+
+document.getElementById('backBtn').addEventListener('click', () => {
+  quizPanel.style.display = 'none';
+  setupPanel.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  if (!finalizedQuiz.length) return;
+  const emailConfig = {
+    teacherEmail: document.getElementById('teacherEmail').value.trim(),
+    publicKey: document.getElementById('emailjsPublicKey').value.trim(),
+    serviceId: document.getElementById('emailjsServiceId').value.trim(),
+    templateId: document.getElementById('emailjsTemplateId').value.trim()
+  };
+  const html = buildStudentHTML(finalizedQuiz, rangeLabel.textContent, emailConfig);
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `arabic_student_test_${stamp}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('emailSettingsToggle').addEventListener('click', () => {
+  document.querySelector('.email-settings').classList.toggle('open');
+});
+
+function buildStudentHTML(quiz, rangeText, emailConfig){
+  emailConfig = emailConfig || {};
+  const quizJSON = JSON.stringify(quiz).replace(/</g, '\\u003c');
+  const cfg = {
+    teacherEmail: emailConfig.teacherEmail || '',
+    publicKey: emailConfig.publicKey || '',
+    serviceId: emailConfig.serviceId || '',
+    templateId: emailConfig.templateId || ''
+  };
+  const cfgJSON = JSON.stringify(cfg).replace(/</g, '\\u003c');
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Arabic Test</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"><\/script>
+<style>
+  :root{ --navy:#1b3a6b; --gold:#e8b84b; --red:#c0392b; --green:#2e7d32; --gray:#666; }
+  *{ box-sizing: border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{ font-family:'Segoe UI', Tahoma, sans-serif; background:#f4f1e9; margin:0; padding:0 0 40px 0; color:#222; overflow-x:hidden; }
+  header{ background:linear-gradient(135deg, var(--navy), #274a80); color:#fff; padding:24px 16px; text-align:center; }
+  header h1{ margin:0 0 6px 0; font-size:1.4em; line-height:1.3; }
+  header .arabic-title{ font-size:1.3em; color:var(--gold); margin-bottom:8px; direction:rtl; line-height:1.5; }
+  header p{ margin:0; color:#e0e0e0; font-size:0.9em; }
+  .container{ max-width:820px; margin:0 auto; padding:16px 12px; width:100%; }
+  .range-label{ display:inline-block; font-size:0.9em; color:var(--navy); font-weight:600; background:#fff; border:1px solid #e2ddc9; padding:8px 12px; border-radius:20px; margin-bottom:16px; }
+  .info-box{ background:#fff; border:1px solid #ddd; border-radius:8px; padding:14px 16px; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:14px; justify-content:space-between; font-size:0.95em; }
+  .info-box > div{ display:flex; align-items:center; gap:8px; flex:1 1 140px; min-width:0; }
+  .info-box label{ font-weight:600; color:var(--navy); white-space:nowrap; }
+  .info-box input[type=text]{ border:none; border-bottom:2px solid var(--gold); background:transparent; font-size:1em; padding:4px; width:100%; min-width:0; outline:none; }
+  .question{ background:#fff; border:1px solid #e2ddc9; border-left:6px solid var(--gold); border-radius:8px; padding:14px 16px; margin-bottom:14px; overflow-wrap:break-word; }
+  .question.correct{ border-left-color:var(--green); background:#f2fbf2; }
+  .question.incorrect{ border-left-color:var(--red); background:#fdf3f2; }
+  .q-title{ font-weight:600; margin-bottom:10px; font-size:1em; line-height:1.5; color:var(--navy); }
+  .q-arabic{ direction:rtl; font-size:1.25em; font-weight:600; color:#111; margin-left:6px; display:inline-block; }
+  .options{ display:flex; flex-direction:column; gap:6px; }
+  .option{ display:flex; align-items:center; gap:10px; padding:12px 10px; border-radius:6px; cursor:pointer; border:1px solid transparent; min-height:44px; -webkit-tap-highlight-color:rgba(232,184,75,0.3); }
+  .option:hover, .option:active{ background:#faf6e7; }
+  .option input{ transform:scale(1.3); cursor:pointer; flex-shrink:0; }
+  .option .opt-text{ font-size:0.98em; line-height:1.4; }
+  .opt-arabic{ direction:rtl; font-size:1.15em; margin-right:4px; display:inline-block; }
+  .feedback-icon{ font-weight:700; margin-left:8px; flex-shrink:0; }
+  .feedback-icon.right{ color:var(--green); }
+  .feedback-icon.wrong{ color:var(--red); }
+  .explain{ margin-top:8px; font-size:0.9em; color:var(--gray); display:none; }
+  .question.checked .explain{ display:block; }
+  .submit-bar{ position:sticky; bottom:0; background:#f4f1e9; padding:14px 8px; text-align:center; display:flex; flex-wrap:wrap; gap:10px; justify-content:center; border-top:1px solid #e2ddc9; }
+  #submitBtn{ background:var(--navy); color:#fff; border:none; padding:14px 30px; font-size:1.05em; border-radius:30px; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,0.2); min-height:48px; flex:1 1 auto; max-width:260px; }
+  #submitBtn:hover{ background:#274a80; }
+  #resetBtn{ background:#fff; color:var(--navy); border:2px solid var(--navy); padding:12px 24px; font-size:1em; border-radius:30px; cursor:pointer; min-height:48px; flex:1 1 auto; max-width:200px; }
+  .score-panel{ background:linear-gradient(135deg, var(--gold), #f5d98a); border-radius:10px; padding:18px 16px; text-align:center; margin-bottom:20px; display:none; box-shadow:0 3px 10px rgba(0,0,0,0.15); }
+  .score-panel h2{ margin:0 0 6px 0; color:var(--navy); font-size:1.2em; }
+  .score-panel .score-num{ font-size:2em; font-weight:700; color:var(--navy); }
+  .score-panel .msg{ font-size:0.95em; color:#3a3a3a; margin-top:6px; line-height:1.4; }
+  .print-btn{ display:none; margin-top:14px; background:var(--navy); color:#fff; border:none; padding:12px 22px; font-size:0.95em; border-radius:24px; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+  .print-btn:hover{ background:#274a80; }
+  .email-status{ margin-top:12px; font-size:0.88em; font-weight:600; display:none; }
+  .email-status.sending{ color:#8a6d1c; display:block; }
+  .email-status.success{ color:var(--green); display:block; }
+  .email-status.error{ color:var(--red); display:block; }
+  .unanswered-warning{ color:var(--red); text-align:center; font-weight:600; margin-bottom:14px; display:none; font-size:0.95em; padding:0 8px; }
+  .q-tag{ display:inline-block; font-size:0.72em; font-weight:700; color:#8a6d1c; background:#fdf1cf; border-radius:10px; padding:2px 8px; margin-bottom:8px; }
+  footer{ text-align:center; color:#999; font-size:0.8em; margin-top:24px; padding:0 12px; }
+  @media (max-width:480px){
+    header h1{ font-size:1.2em; } header .arabic-title{ font-size:1.15em; }
+    .container{ padding:12px 10px; } .question{ padding:12px 12px; border-left-width:5px; }
+    .q-title{ font-size:0.95em; } .q-arabic{ font-size:1.15em; } .opt-arabic{ font-size:1.05em; }
+    .info-box{ flex-direction:column; gap:10px; } .info-box > div{ flex:1 1 auto; }
+    #submitBtn, #resetBtn{ max-width:none; width:100%; }
+  }
+  @media print{
+    body{ background:#fff; padding-bottom:0; }
+    header{ background:#fff !important; color:#000; padding:10px 0; }
+    header .arabic-title{ color:#000; }
+    header p{ color:#333; }
+    .submit-bar, .unanswered-warning, .print-btn{ display:none !important; }
+    .score-panel{ display:block !important; background:#fff; border:2px solid #000; box-shadow:none; }
+    .question{ break-inside:avoid; page-break-inside:avoid; border:1px solid #999; box-shadow:none; }
+    .explain{ display:block !important; }
+    .info-box{ border:1px solid #999; box-shadow:none; }
+    .info-box input[type=text]{ border-bottom:1px solid #000; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="arabic-title">اِخْتِبَارٌ فِي اللُّغَةِ الْعَرَبِيَّةِ</div>
+  <h1>Arabic Test</h1>
+  <p>Answer every question, then press Submit to see your score.</p>
+</header>
+<div class="container">
+  <span class="range-label">${rangeText}</span>
+  <div class="info-box">
+    <div><label>Name: </label><input type="text" id="studentName" placeholder="Your name"></div>
+    <div><label>Date: </label><input type="text" id="studentDate" placeholder="dd/mm/yyyy"></div>
+  </div>
+  <div class="score-panel" id="scorePanel">
+    <h2>Your Result</h2>
+    <div class="score-num" id="scoreNum">0 / 0</div>
+    <div class="msg" id="scoreMsg"></div>
+    <div class="email-status" id="emailStatus"></div>
+    <button type="button" id="printBtn" class="print-btn">📄 Download PDF of This Test</button>
+  </div>
+  <div class="unanswered-warning" id="unansweredWarning">Please answer all questions before submitting.</div>
+  <form id="quizForm"></form>
+  <div class="submit-bar">
+    <button type="button" id="submitBtn">Submit Test</button>
+    <button type="button" id="resetBtn">Reset Answers</button>
+  </div>
+  <footer>Arabic Test — self-graded</footer>
+</div>
+<script>
+const QUIZ = ${quizJSON};
+const EMAIL_CFG = ${cfgJSON};
+const EMAIL_CONFIGURED = !!(EMAIL_CFG.publicKey && EMAIL_CFG.serviceId && EMAIL_CFG.templateId && EMAIL_CFG.teacherEmail);
+if (EMAIL_CONFIGURED && typeof emailjs !== 'undefined') {
+  emailjs.init(EMAIL_CFG.publicKey);
+}
+const quizForm = document.getElementById('quizForm');
+const scorePanel = document.getElementById('scorePanel');
+const unansweredWarning = document.getElementById('unansweredWarning');
+
+QUIZ.forEach((q, i) => {
+  const qDiv = document.createElement('div');
+  qDiv.className = 'question';
+  qDiv.id = 'q' + i;
+
+  const tag = document.createElement('div');
+  tag.className = 'q-tag';
+  tag.textContent = 'Page ' + q.page;
+  qDiv.appendChild(tag);
+
+  const title = document.createElement('div');
+  title.className = 'q-title';
+  title.innerHTML = (i+1) + '. ' + q.title;
+  qDiv.appendChild(title);
+
+  const optsDiv = document.createElement('div');
+  optsDiv.className = 'options';
+  q.options.forEach((opt, j) => {
+    const label = document.createElement('label');
+    label.className = 'option';
+    label.id = 'q' + i + 'opt' + j;
+    label.innerHTML = '<input type="radio" name="q' + i + '" value="' + j + '"><span class="opt-text">' + opt + '</span><span class="feedback-icon" id="icon' + i + '_' + j + '"></span>';
+    optsDiv.appendChild(label);
+  });
+  qDiv.appendChild(optsDiv);
+
+  const explain = document.createElement('div');
+  explain.className = 'explain';
+  explain.textContent = 'Explanation: ' + q.explain;
+  qDiv.appendChild(explain);
+
+  quizForm.appendChild(qDiv);
+});
+
+document.getElementById('submitBtn').addEventListener('click', () => {
+  let answeredCount = 0, score = 0;
+  const total = QUIZ.length;
+  const breakdownLines = [];
+
+  QUIZ.forEach((q, i) => {
+    const qDiv = document.getElementById('q' + i);
+    const selected = quizForm.querySelector('input[name="q' + i + '"]:checked');
+    qDiv.classList.add('checked');
+    const numOpts = q.options.length;
+    const qText = stripHtml(q.title);
+    const correctText = stripHtml(q.options[q.correct]);
+
+    if (selected) {
+      answeredCount++;
+      const chosen = parseInt(selected.value);
+      const isCorrect = chosen === q.correct;
+      if (isCorrect) score++;
+      qDiv.classList.remove('correct', 'incorrect');
+      qDiv.classList.add(isCorrect ? 'correct' : 'incorrect');
+      for (let j = 0; j < numOpts; j++) {
+        const icon = document.getElementById('icon' + i + '_' + j);
+        icon.textContent = ''; icon.className = 'feedback-icon';
+        if (j === q.correct) { icon.textContent = '✓'; icon.classList.add('right'); }
+        else if (j === chosen) { icon.textContent = '✗'; icon.classList.add('wrong'); }
+      }
+      breakdownLines.push(
+        (i+1) + '. ' + qText + '\\n   Your answer: ' + stripHtml(q.options[chosen]) +
+        (isCorrect ? '  [Correct]' : '  [Incorrect — correct answer: ' + correctText + ']')
+      );
+    } else {
+      qDiv.classList.remove('correct', 'incorrect');
+      for (let j = 0; j < numOpts; j++) {
+        const icon = document.getElementById('icon' + i + '_' + j);
+        icon.textContent = j === q.correct ? '✓' : '';
+        icon.className = 'feedback-icon' + (j === q.correct ? ' right' : '');
+      }
+      breakdownLines.push((i+1) + '. ' + qText + '\\n   Your answer: (not answered)  [Correct answer: ' + correctText + ']');
+    }
+  });
+
+  unansweredWarning.style.display = (answeredCount < total) ? 'block' : 'none';
+  scorePanel.style.display = 'block';
+  document.getElementById('scoreNum').textContent = score + ' / ' + total;
+
+  const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+  let msg = '';
+  if (pct === 100) msg = 'مُمْتَازٌ! Perfect score!';
+  else if (pct >= 80) msg = 'أَحْسَنْتَ! Great job!';
+  else if (pct >= 60) msg = 'جَيِّدٌ. Good, but review a bit more.';
+  else msg = 'رَاجِعِ الدَّرْسَ. Please review the lessons and try again.';
+
+  const name = document.getElementById('studentName').value;
+  const date = document.getElementById('studentDate').value;
+  document.getElementById('scoreMsg').textContent = (name ? name + ' — ' : '') + msg + ' (' + pct + '%)';
+  document.getElementById('printBtn').style.display = 'inline-block';
+  scorePanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  sendResultsEmail(name, date, score, total, pct, breakdownLines);
+});
+
+function stripHtml(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return (tmp.textContent || tmp.innerText || '').trim();
+}
+
+function setEmailStatus(state, text) {
+  const el = document.getElementById('emailStatus');
+  el.className = 'email-status ' + state;
+  el.textContent = text;
+}
+
+function sendResultsEmail(name, date, score, total, pct, breakdownLines) {
+  if (!EMAIL_CONFIGURED || typeof emailjs === 'undefined') {
+    return; // No email settings configured — student can still use the PDF button.
+  }
+  setEmailStatus('sending', 'Sending your results…');
+  const params = {
+    to_email: EMAIL_CFG.teacherEmail,
+    student_name: name || '(no name entered)',
+    student_date: date || '(no date entered)',
+    score: score,
+    total: total,
+    percentage: pct + '%',
+    breakdown: breakdownLines.join('\\n\\n')
+  };
+  emailjs.send(EMAIL_CFG.serviceId, EMAIL_CFG.templateId, params)
+    .then(() => setEmailStatus('success', '✅ Results sent to your teacher.'))
+    .catch((err) => {
+      console.error('EmailJS error:', err);
+      setEmailStatus('error', '⚠️ Could not send results automatically. Please download the PDF and share it instead.');
+    });
+}
+
+document.getElementById('printBtn').addEventListener('click', () => {
+  window.print();
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  quizForm.reset();
+  QUIZ.forEach((q, i) => {
+    const qDiv = document.getElementById('q' + i);
+    qDiv.classList.remove('correct', 'incorrect', 'checked');
+    q.options.forEach((opt, j) => {
+      const icon = document.getElementById('icon' + i + '_' + j);
+      icon.textContent = ''; icon.className = 'feedback-icon';
+    });
+  });
+  scorePanel.style.display = 'none';
+  document.getElementById('printBtn').style.display = 'none';
+  setEmailStatus('', '');
+  unansweredWarning.style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+<\/script>
+</body>
+</html>`;
+}
+</script>
+
+</body>
+</html>
